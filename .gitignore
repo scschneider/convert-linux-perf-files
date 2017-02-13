@@ -1,0 +1,5 @@
+pssdiag.conf
+*timezone.out
+/bin
+/obj
+/.vscode
