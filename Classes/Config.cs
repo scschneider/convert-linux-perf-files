@@ -67,7 +67,7 @@ using System.Collections.Generic;
         private void setConfigVariables()
         {
             // create the list that contains the lines from the config file.
-            List<string> configFileContents = readConfigFile("pssdiag.conf");
+            List<string> configFileContents = getFileContents("pssdiag.conf");
 
             // itterate through the config file line by line.
             foreach (string line in configFileContents)
@@ -121,7 +121,7 @@ using System.Collections.Generic;
                 }// END if line
             };// END foreach line
         }// END setConfigVariables
-        private List<string> readConfigFile(string fileName)
+        private List<string> getFileContents(string fileName)
         {
            List<string> fileContents = new List<string>();
            FileHelper fileHelper = new FileHelper(fileName);
