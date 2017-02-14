@@ -1,0 +1,18 @@
+Title: Convert Performance Files
+Actor: System
+
+Scenario: 
+1. System reads timezone OUT file to set the appropriate timezone for the metrics.
+1. System reads configuration file and gets which OUT files to convert and what PIDs to filter on.
+2. System reads OUT files and gets meaningful data based on the OUT file type
+	Extension:
+		a. Type1 is block format with each block containing it's own single date/time (timestamp). Each block contains header.
+			When OUT file is Type1, the system will read the first header only. The system will read each block's timestamp and metrics.
+		b. Type2 is block format with each line in the block containg time. Date is specified once on line 0. Each block contains header.
+			When OUT file is Type2, the system will read the date on line 0. System will read the first header only. System will read each line's time and metrics.
+		c. Type3 is list format with each line containing time. Date is specified once on line 0. Single instance of header
+			When OUT file is Type3, the system will read the date on line 0. System will read the header. System will read each line's time and metrics
+		d. Type4 is block format is block format with each line containing a timestamp in EPOCH format.
+			When OUT file is Type4, the system will read the first header only. System will read each line's time and metrics.
+3. System converts meaningful data to TSV files by reading the input from the OUT file conversion
+4. System saves converted meaningful data to TSV files.
