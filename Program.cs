@@ -14,6 +14,7 @@ namespace ConsoleApplication
             bool mpStat = myNewCfg.getImportMpStat();
             bool memFree = myNewCfg.getImportMemFree();
             bool memSwap = myNewCfg.getImportMemSwap();
+            bool netStat = myNewCfg.getImportNetStats();
             bool pidStat = myNewCfg.getImportPidStat();
             string[] pidFilter = myNewCfg.getPidStatFilter();
 
@@ -23,6 +24,7 @@ namespace ConsoleApplication
             if (mpStat) {convertMpStatToTsv();}
             if (memFree) {convertMemFreeToTsv();}
             if (memSwap) {convertMemSwapToTsv();}
+            if (netStat) {convertNetStatToTsv();}
             if (pidStat) {convertPidStatToTsv(pidFilter);}
 
             
@@ -56,6 +58,10 @@ namespace ConsoleApplication
 
         }
         
+        public static void convertNetStatToTsv()
+        {
+            string outNetStatFileName = "*network_stats.out";
+        }
         public static void convertPidStatToTsv(string[] filter)
         {
             string outPidStatFileName = "*pidstat.out";

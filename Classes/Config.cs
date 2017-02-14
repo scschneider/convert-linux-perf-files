@@ -10,6 +10,7 @@ class Config
     private bool ImportMpStat;
     private bool ImportMemFree;
     private bool ImportMemSwap;
+    private bool ImportNetStats;
     private bool ImportPidStat;
     private string[] PidStatFilter;
 
@@ -41,6 +42,10 @@ class Config
     {
         ImportMemSwap = value;
     }
+    private void setImportNetStats(bool value)
+    {
+        ImportNetStats = value;
+    }
     private void setImportPidStat(bool value)
     {
         ImportPidStat = value;
@@ -71,6 +76,10 @@ class Config
     {
         return ImportMemSwap;
     }
+    public bool getImportNetStats()
+    {
+        return ImportNetStats;
+    }
     public bool getImportPidStat()
     {
         return ImportPidStat;   
@@ -87,8 +96,8 @@ class Config
 // class functions
     private void setConfigVariables()
     {
-        // create the list that contains the lines from the config file.
         TypeConversionHelper typeConversionHelper = new TypeConversionHelper();
+        // create the list that contains the lines from the config file.
         FileHelper fileHelper = new FileHelper("pssdiag.conf");
         List<string> configFileContents = fileHelper.readFileByLine();
         // delimeter for parameter lines "parameter = value"
@@ -131,6 +140,9 @@ class Config
                         break;
                     case "import_memswap":
                         setImportMemSwap(parameterValueBool);
+                        break;
+                    case "import_network_stats":
+                        setImportNetStats(parameterValueBool);
                         break;
                     case "import_pidstat":
                         setImportPidStat(parameterValueBool);

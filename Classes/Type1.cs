@@ -1,10 +1,50 @@
+using System.Collections.Generic;
 class Type1 : OutFile
 {
     public Type1(string fileName) : base(fileName)
     {
         
+
+        setHeader();
+        setMetrics();
+
+        setFileName(fileName);
+        setFileContents();
+        generateHeader();
+        generateMetrics();   
     }
     
+    private void setFileName(string fileName)
+    {
+        //FileName = fileName;
+    }
+    private void setFileContents()
+    {
+        FileHelper fileHelper = new FileHelper(FileName);
+        List<string> fileContents = fileHelper.readFileByLine();
+    }
+    private void setHeader()
+    {
+        List<string> header = generateHeader()
+
+    }
+
+    private void setMetrics()
+    {
+
+    }
+    private List<string> generateHeader(List<string> fileContents)
+    {
+        List<string> value;
+
+        return value;
+    }
+
+    private void generateMetrics(List<string> fileContents)
+    {
+
+    }
+
 }
 
 /* EXAMPLE of Type1 file
