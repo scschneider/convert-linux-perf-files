@@ -2,13 +2,14 @@ using System.Collections.Generic;
 
 class Config
 {
-    private string timeZone;
-    private bool importIoStat;
-    private bool importMpStat;
-    private bool importMemFree;
-    private bool importMemSwap;
-    private bool importPidStat;
-    private string[] pidStatFilter;
+// class variables
+    private string TimeZone;
+    private bool ImportIoStat;
+    private bool ImportMpStat;
+    private bool ImportMemFree;
+    private bool ImportMemSwap;
+    private bool ImportPidStat;
+    private string[] PidStatFilter;
 
 // class constructors    
     public Config()
@@ -20,57 +21,57 @@ class Config
 // class private set functions
     private void setImportIoStat(bool value)
     {
-        importIoStat = value;
+        ImportIoStat = value;
     }
     private void setImportMpStat(bool value)
     {
-        importMpStat = value;
+        ImportMpStat = value;
     }
     private void setImportMemFree(bool value)
     {
-        importMemFree = value;
+        ImportMemFree = value;
     }
     private void setImportMemSwap(bool value)
     {
-        importMemSwap = value;
+        ImportMemSwap = value;
     }
     private void setImportPidStat(bool value)
     {
-        importPidStat = value;
+        ImportPidStat = value;
     }
     private void setPidStatFilter(string[] value)
     {
-        pidStatFilter = value;
+        PidStatFilter = value;
     }
 
 // class public get functions
     public bool getImportIoStat()
     {
-        return importIoStat;
+        return ImportIoStat;
     }
     public bool getImportMpStat()
     {
-        return importMpStat;
+        return ImportMpStat;
     }
     public bool getImportMemFree()
     {
-        return importMemFree;
+        return ImportMemFree;
     }
     public bool getImportMemSwap()
     {
-        return importMemSwap;
+        return ImportMemSwap;
     }
     public bool getImportPidStat()
     {
-        return importPidStat;   
+        return ImportPidStat;   
     }
     public string[] getPidStatFilter()
     {
-        return pidStatFilter;
+        return PidStatFilter;
     }
     public string getTimeZone()
     {
-        return timeZone;
+        return TimeZone;
     }
 
 // class functions
@@ -141,6 +142,6 @@ class Config
         List<string> configFileContents = fileHelper.readFileByLine();
         string tz = configFileContents[0].Substring(0,3);
         
-        timeZone = tz;
+        TimeZone = tz;
     }// END setTimeZone
 }
