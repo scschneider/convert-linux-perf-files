@@ -1,8 +1,10 @@
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 class Config
 {
 // class variables
+    private string MachineName;
     private string TimeZone;
     private bool ImportIoStat;
     private bool ImportMpStat;
@@ -19,6 +21,10 @@ class Config
     }
 
 // class private set functions
+    private void setMachineName (string value)
+    {
+        MachineName = value;
+    }
     private void setImportIoStat(bool value)
     {
         ImportIoStat = value;
@@ -45,6 +51,10 @@ class Config
     }
 
 // class public get functions
+    public string getMachineName()
+    {
+        return MachineName;
+    }
     public bool getImportIoStat()
     {
         return ImportIoStat;
@@ -106,6 +116,10 @@ class Config
                 // check parameter name and when it matches, set the value of the parameter.
                 switch (parameter)
                 {
+                    case "machine_name":
+                        parameterValueString = splitValue[1];
+                        setMachineName(parameterValueString);
+                        break;
                     case "import_iostat":
                         setImportIoStat(parameterValueBool);
                         break;
@@ -122,8 +136,11 @@ class Config
                         setImportPidStat(parameterValueBool);
                         break;
                     case "import_pidstat_filter":
-                        // since pidstat_filter accepts comma separated values, we need to capture this and turn it into an array.
-                        parameterValueString = splitValue[1].ToLower();
+                        // since pidstat_filter accepts comma separated values, we need to remove spaces, capture this and turn it into an array.
+                        string spacePattern = "\\s+";
+                        string spaceReplacement = "";
+                        Regex rgx = new Regex(spacePattern);
+                        parameterValueString = rgx.Replace(splitValue[1].ToLower(),spaceReplacement);
                         string[] pidStatFilerSplitValue = parameterValueString.Split(pidStatFilterDelimeter);
                         
                         setPidStatFilter(pidStatFilerSplitValue);
