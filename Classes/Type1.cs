@@ -22,8 +22,7 @@ class Type1 : OutFile
     
     private void setHeader()
     {
-        
-        List<string> header = generateHeader();
+        //List<string> header = generateHeader();
         
     }
 
@@ -31,10 +30,10 @@ class Type1 : OutFile
     {
 
     }
-    private List<string> generateHeader()
+    private string[] generateHeader()
     {
         // 
-        List<string> value = new List<string>();
+        string[] value = {}; // = new List<string>();
 
         return value;
     }

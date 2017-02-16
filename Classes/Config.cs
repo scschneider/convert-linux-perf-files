@@ -14,7 +14,7 @@ class Config
     private bool ImportPidStat;
     private string[] PidStatFilter;
 
-// class constructors    
+// class constructor
     public Config()
     {
         setConfigVariables();

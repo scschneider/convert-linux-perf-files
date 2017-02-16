@@ -27,7 +27,7 @@ namespace ConsoleApplication
             if (netStat) {convertNetStatToTsv();}
             if (pidStat) {convertPidStatToTsv(pidFilter);}
 
-            Type1 t1 = new Type1("*iostat.out");
+            //Type1 t1 = new Type1("*iostat.out");
 
             
             Console.WriteLine("Hello World!");
@@ -36,7 +36,8 @@ namespace ConsoleApplication
         public static void convertIoStatToTsv()
         {
             string outIoStatFileName = "*iostat.out";
-            Type1 type1OutFile = new Type1(outIoStatFileName);
+            IoStat ioStat = new IoStat(outIoStatFileName);
+            //Type1 type1OutFile = new Type1(outIoStatFileName);
             
 
 
