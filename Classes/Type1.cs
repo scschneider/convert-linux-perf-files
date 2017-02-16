@@ -3,39 +3,38 @@ class Type1 : OutFile
 {
     public Type1(string fileName) : base(fileName)
     {
-        
+        setFileContents();
 
         setHeader();
         setMetrics();
-
-        setFileName(fileName);
-        setFileContents();
-        generateHeader();
-        generateMetrics();   
+        
+        //setFileName(fileName);
+        
+        //generateHeader();
+        //generateMetrics();   
     }
     
-    private void setFileName(string fileName)
-    {
+    //private void setFileName(string fileName)
+    //{
+        
         //FileName = fileName;
-    }
-    private void setFileContents()
-    {
-        FileHelper fileHelper = new FileHelper(FileName);
-        List<string> fileContents = fileHelper.readFileByLine();
-    }
+    //}
+    
     private void setHeader()
     {
-        List<string> header = generateHeader()
-
+        
+        List<string> header = generateHeader();
+        
     }
 
     private void setMetrics()
     {
 
     }
-    private List<string> generateHeader(List<string> fileContents)
+    private List<string> generateHeader()
     {
-        List<string> value;
+        // 
+        List<string> value = new List<string>();
 
         return value;
     }

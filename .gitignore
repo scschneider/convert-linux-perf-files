@@ -1,5 +1,6 @@
 pssdiag.conf
-*timezone.out
+*.out
+*.tsv
 /bin
 /obj
 /.vscode

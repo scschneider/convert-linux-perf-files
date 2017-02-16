@@ -1,9 +1,11 @@
-class OutFile
+using System.Collections.Generic;
+abstract class OutFile
 {
 // class variables
     private string[] Header;
     private string[] Metrics;
     private string FileName;
+    private List<string> FileContents;
 
 // class constructor
     public OutFile(string fileName)
@@ -11,12 +13,18 @@ class OutFile
         setFileName(fileName);
     }
 
-// private set functions
-    private void setFileName(string fileName)
+// public set functions
+    public void setFileName(string fileName)
     {
         FileName = fileName;
     }
+    public void setFileContents()
+    {
+        FileHelper fileHelper = new FileHelper(FileName);
+        FileContents = fileHelper.readFileByLine();
 
+    }
+// private set functions
     private void setHeader(string[] header)
     {
         Header = header;

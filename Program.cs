@@ -27,6 +27,8 @@ namespace ConsoleApplication
             if (netStat) {convertNetStatToTsv();}
             if (pidStat) {convertPidStatToTsv(pidFilter);}
 
+            Type1 t1 = new Type1("*iostat.out");
+
             
             Console.WriteLine("Hello World!");
         
