@@ -5,6 +5,7 @@ class IoStat
 {
     private string FileName;
     private string Header;
+    private List<string> Devices;
     private List<string> Metrics;
     private List<string> FileContents;
 
@@ -13,8 +14,8 @@ class IoStat
     {
         setFileName(fileName);
         setFileContents();
+        setDevices();
         setHeader();
-
     }
 
 // class private set functions
@@ -22,11 +23,37 @@ class IoStat
     private void setFileName(string fileName)
     {
         FileName = fileName;
+        MachineName = machineName;
     }
 
     private void setHeader()
     {
         generateHeader();
+    }
+    private void setDevices()
+    {
+        string emptyLinePattern = "^\r\n";
+        string splitPattern = "\\s+";
+
+        Regex rgxEmptyLine = new Regex(emptyLinePattern);
+        Regex rgxSplitLine = new Regex(splitPattern);
+
+        int blockCount = 1;
+        int block = 0;
+        int lineNumber = 4;
+        
+        while (block < blockCount)
+        {
+            if (!rgxEmptyLine.IsMatch(FileContents[lineNumber]))
+            {
+                string[] thisLineValues = rgxSplitLine.Split(FileContents[lineNumber]);
+                Devices.Add(thisLineValues[0]);
+                lineNumber++;
+            }
+            else {
+                block++;
+            }
+        }
     }
 
     private void setMetrics()
@@ -45,18 +72,17 @@ class IoStat
 
     private void generateHeader()
     {
-        string spacePattern = "\\s+";
-        Regex rgx = new Regex(spacePattern);
-        
-        int sampleSize = 2;
-        int i = 0;
-        string[] sampleArray = new string[sampleSize];
+        string splitPattern = "\\s+";
+        Regex rgx = new Regex(splitPattern);
         string[] outHeader = rgx.Split(FileContents[3]);
+        Header += "(PDH-TSV 4.0) (Pacific Daylight Time)(420)";
 
-        while (i < sampleSize)
+        foreach (string device in Devices)
         {
-
-            i++;
+            for (int i = 1; i < outHeader.Length; i++ )
+            {
+                Header += "";
+            }
         }
     }
 

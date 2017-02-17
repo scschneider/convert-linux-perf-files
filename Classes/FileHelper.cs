@@ -2,19 +2,19 @@ using System.IO;
 using System.Collections.Generic;
 class FileHelper
 {
-    string fName;
+    string FileName;
 
     public FileHelper(string fileName)
     {
-        fName = fileName;
+        setFileName(fileName);
     }
-    private void setFileName()
+    private void setFileName(string fileName)
     {
-
+        FileName = fileName;
     }
     public string getFileName()
     {
-        return fName;
+        return FileName;
     }
 
     public List<string> readFileByLine()
@@ -23,7 +23,7 @@ class FileHelper
         // gets the current directory that the script is executed from
         string currentDirectory = Directory.GetCurrentDirectory();
         // creates the full file path of the file that will be opened
-        string[] filePath = Directory.GetFiles(currentDirectory,fName);
+        string[] filePath = Directory.GetFiles(currentDirectory,FileName);
         List<string> returnValue = new List<string>();
         // opens the file
         FileStream fs = new FileStream(filePath[0],FileMode.Open);
