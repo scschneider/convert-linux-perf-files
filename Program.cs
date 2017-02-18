@@ -9,23 +9,23 @@ namespace ConsoleApplication
         public static void Main(string[] args)
         {
             Config myNewCfg = new Config();
-            string timeZone = myNewCfg.getTimeZone();
-            bool ioStat = myNewCfg.getImportIoStat();
-            bool mpStat = myNewCfg.getImportMpStat();
-            bool memFree = myNewCfg.getImportMemFree();
-            bool memSwap = myNewCfg.getImportMemSwap();
-            bool netStat = myNewCfg.getImportNetStats();
-            bool pidStat = myNewCfg.getImportPidStat();
-            string[] pidFilter = myNewCfg.getPidStatFilter();
+            string timeZone = myNewCfg.TimeZone;
+            bool ioStat = myNewCfg.ImportIoStat;
+            bool mpStat = myNewCfg.ImportMpStat;
+            bool memFree = myNewCfg.ImportMemFree;
+            bool memSwap = myNewCfg.ImportMemSwap;
+            bool netStat = myNewCfg.ImportNetStats;
+            bool pidStat = myNewCfg.ImportPidStat;
+            string[] pidFilter = myNewCfg.PidStatFilter;
 
             //test
             
-            if (ioStat) {convertIoStatToTsv();}
-            if (mpStat) {convertMpStatToTsv();}
-            if (memFree) {convertMemFreeToTsv();}
-            if (memSwap) {convertMemSwapToTsv();}
-            if (netStat) {convertNetStatToTsv();}
-            if (pidStat) {convertPidStatToTsv(pidFilter);}
+            if (ioStat) {ConvertIoStatToTsv();}
+            if (mpStat) {ConvertMpStatToTsv();}
+            if (memFree) {ConvertMemFreeToTsv();}
+            if (memSwap) {ConvertMemSwapToTsv();}
+            if (netStat) {ConvertNetStatToTsv();}
+            if (pidStat) {ConvertPidStatToTsv(pidFilter);}
 
             //Type1 t1 = new Type1("*iostat.out");
 
@@ -33,40 +33,40 @@ namespace ConsoleApplication
             Console.WriteLine("Hello World!");
         
         }// END Main
-        public static void convertIoStatToTsv()
+        public static void ConvertIoStatToTsv()
         {
             string outIoStatFileName = "*iostat.out";
             IoStat ioStat = new IoStat(outIoStatFileName);
-            Console.WriteLine(ioStat.getHeader());
+            Console.WriteLine(ioStat.Header);
             //Type1 type1OutFile = new Type1(outIoStatFileName);
             
 
 
         }
 
-        public static void convertMpStatToTsv()
+        public static void ConvertMpStatToTsv()
         {
             string outMpStatFileName = "*mpstats_cpu.out";
 
         }
 
-        public static void convertMemFreeToTsv()
+        public static void ConvertMemFreeToTsv()
         {
             string outMemFreeFileName = "*memory_free.out";
 
         }
 
-        public static void convertMemSwapToTsv()
+        public static void ConvertMemSwapToTsv()
         {
             string outMemSwapFileName = "*memory_swap.out";
 
         }
         
-        public static void convertNetStatToTsv()
+        public static void ConvertNetStatToTsv()
         {
             string outNetStatFileName = "*network_stats.out";
         }
-        public static void convertPidStatToTsv(string[] filter)
+        public static void ConvertPidStatToTsv(string[] filter)
         {
             string outPidStatFileName = "*pidstat.out";
 

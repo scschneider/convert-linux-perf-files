@@ -4,72 +4,50 @@ using System.Text.RegularExpressions;
 
 class IoStat
 {
-    private string FileName;
-    private string Header;
-    private List<string> Devices;
-    private List<string> Metrics;
-    private List<string> FileContents;
+    public string FileName {get; private set;}
+    public string Header {get; private set;}
+    public List<string> Devices {get; private set;}
+    public List<string> Metrics {get; private set;}
+    public List<string> FileContents {get; private set;}
 
     // class constructor
     public IoStat(string fileName)
     {
-        setFileName(fileName);
-        setFileContents();
-        setDevices();
-        setHeader();
-        setMetrics();
+        SetFileName(fileName);
+        SetFileContents();
+        SetDevices();
+        SetHeader();
+        SetMetrics();
     }
 
     // class private set functions
-    private void setFileName(string fileName)
+    private void SetFileName(string fileName)
     {
         FileName = fileName;
-        //MachineName = machineName;
     }
-    private void setFileContents()
+    private void SetFileContents()
     {
         FileHelper fileHelper = new FileHelper(FileName);
-        FileContents = fileHelper.readFileByLine();
+        FileContents = fileHelper.ReadFileByLine();
     }
-    private void setHeader()
+    private void SetHeader()
     {
-        Header = generateHeader();
+        Header = GenerateHeader();
     }
-    private void setDevices()
+    private void SetDevices()
     {
-        Devices = generateDevices();
+        Devices = GenerateDevices();
     }
 
-    private void setMetrics()
+    private void SetMetrics()
     {
-        Metrics = generateMetrics();
+        Metrics = GenerateMetrics();
     }
 
-    //class public get functions
-    public string getFileName()
-    {
-        return FileName;
-    }
-    public string getHeader()
-    {
-        return Header;
-    }
-    public List<string> getFileContents()
-    {
-        return FileContents;
-    }
-    public List<string> getMetrics()
-    {
-        return Metrics;
-    }
-    public List<string> getDevices()
-    {
-        return Devices;
-    }
+// class functions
 
-
-    // class functions
-    private List<string> generateDevices()
+// this method gets the devices that the metrics are recorded for. Since they are in column format, we need to get them so that we can format them for TSV format
+    private List<string> GenerateDevices()
     {
         string emptyLinePattern = "^\\s*$";
         string splitPattern = "\\s+";
@@ -91,15 +69,16 @@ class IoStat
                 devices.Add(thisLineValues[0]);
                 lineNumber++;
             }
-            else
-            {
+            else {
                 block++;
-            }
-        }
+            }// END if rgxEmptyLine
+        }// END while block
 
         return devices;
-    }
-    private string generateHeader()
+    }// END GenerateDevices
+
+    // since the headers are recorded for every for every block, we need to collect these and combine them with devices to generate the header line for the tsv file
+    private string GenerateHeader()
     {
         string splitPattern = "\\s+";
         Regex rgx = new Regex(splitPattern);
@@ -113,16 +92,16 @@ class IoStat
             {
                 header.Append("\\\\MACHINENAME\\LogicalDisk(" + device + ")\\" + outHeader[i] + "\t");
             }
-        }
+        }// END foreach device
 
         return header.ToString();
-    }
-    private List<string> generateMetrics()
+    }// END GenerateHeader
+    private List<string> GenerateMetrics()
     {
         List<string> metrics = new List<string>();
 
         return metrics;
-    }
+    }// END GenerateMetrics
 }
 
 /* EXAMPLE of IoStat file

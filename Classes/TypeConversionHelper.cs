@@ -1,6 +1,6 @@
 class TypeConversionHelper
 {
-    public bool convertTypeToBool(string typeValue)
+    public bool ConvertTypeToBool(string typeValue)
     {
         bool pv;
         switch (typeValue)

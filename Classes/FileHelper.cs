@@ -2,22 +2,23 @@ using System.IO;
 using System.Collections.Generic;
 class FileHelper
 {
-    string FileName;
+// class properties
+    public string FileName {get; private set;}
 
+// class constructor
     public FileHelper(string fileName)
     {
-        setFileName(fileName);
+        SetFileName(fileName);
     }
-    private void setFileName(string fileName)
+
+// class private setters
+    private void SetFileName(string fileName)
     {
         FileName = fileName;
     }
-    public string getFileName()
-    {
-        return FileName;
-    }
 
-    public List<string> readFileByLine()
+// class methods
+    public List<string> ReadFileByLine()
     {
 // ***** Need to add logic to check if file exists. *****
         // gets the current directory that the script is executed from
@@ -36,9 +37,9 @@ class FileHelper
                 string line = sr.ReadLine();
                 returnValue.Add(line);
             }
-        }
+        }// END using StreamReader
 
         // array of lines that got read and is returned
         return returnValue;
-    }
+    }// END ReadFileByLine
 }

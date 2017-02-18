@@ -4,102 +4,64 @@ using System.Text.RegularExpressions;
 class Config
 {
 // class variables
-    private string MachineName;
-    private string TimeZone;
-    private bool ImportIoStat;
-    private bool ImportMpStat;
-    private bool ImportMemFree;
-    private bool ImportMemSwap;
-    private bool ImportNetStats;
-    private bool ImportPidStat;
-    private string[] PidStatFilter;
+    public string MachineName {get; private set;}
+    public string TimeZone {get; private set;}
+    public bool ImportIoStat {get; private set;}
+    public bool ImportMpStat {get; private set;}
+    public bool ImportMemFree {get; private set;}
+    public bool ImportMemSwap {get; private set;}
+    public bool ImportNetStats {get; private set;}
+    public bool ImportPidStat {get; private set;}
+    public string[] PidStatFilter {get; private set;}
 
 // class constructor
     public Config()
     {
-        setConfigVariables();
-        setTimeZone();
+        SetConfigVariables();
+        SetTimeZone();
     }
 
 // class private set functions
-    private void setMachineName (string value)
+    private void SetMachineName (string value)
     {
         MachineName = value;
     }
-    private void setImportIoStat(bool value)
+    private void SetImportIoStat(bool value)
     {
         ImportIoStat = value;
     }
-    private void setImportMpStat(bool value)
+    private void SetImportMpStat(bool value)
     {
         ImportMpStat = value;
     }
-    private void setImportMemFree(bool value)
+    private void SetImportMemFree(bool value)
     {
         ImportMemFree = value;
     }
-    private void setImportMemSwap(bool value)
+    private void SetImportMemSwap(bool value)
     {
         ImportMemSwap = value;
     }
-    private void setImportNetStats(bool value)
+    private void SetImportNetStats(bool value)
     {
         ImportNetStats = value;
     }
-    private void setImportPidStat(bool value)
+    private void SetImportPidStat(bool value)
     {
         ImportPidStat = value;
     }
-    private void setPidStatFilter(string[] value)
+    private void SetPidStatFilter(string[] value)
     {
         PidStatFilter = value;
     }
 
-// class public get functions
-    public string getMachineName()
-    {
-        return MachineName;
-    }
-    public bool getImportIoStat()
-    {
-        return ImportIoStat;
-    }
-    public bool getImportMpStat()
-    {
-        return ImportMpStat;
-    }
-    public bool getImportMemFree()
-    {
-        return ImportMemFree;
-    }
-    public bool getImportMemSwap()
-    {
-        return ImportMemSwap;
-    }
-    public bool getImportNetStats()
-    {
-        return ImportNetStats;
-    }
-    public bool getImportPidStat()
-    {
-        return ImportPidStat;   
-    }
-    public string[] getPidStatFilter()
-    {
-        return PidStatFilter;
-    }
-    public string getTimeZone()
-    {
-        return TimeZone;
-    }
-
 // class functions
-    private void setConfigVariables()
+    private void SetConfigVariables()
     {
         TypeConversionHelper typeConversionHelper = new TypeConversionHelper();
-        // create the list that contains the lines from the config file.
+        // need to read config file
         FileHelper fileHelper = new FileHelper("pssdiag.conf");
-        List<string> configFileContents = fileHelper.readFileByLine();
+        List<string> configFileContents = fileHelper.ReadFileByLine();
         // delimeter for parameter lines "parameter = value"
         char parameterDelimeter = '=';
         // delimeter for pidstat filter value "sqlservr,sqlcmd"
@@ -119,7 +81,7 @@ class Config
                 splitValue = line.Split(parameterDelimeter);
                 // the configuration file allows for values of true/false and yes/no. this will convert those to bool values.
                 string parameterValue = splitValue[1].ToLower();
-                parameterValueBool = typeConversionHelper.convertTypeToBool(parameterValue);
+                parameterValueBool = typeConversionHelper.ConvertTypeToBool(parameterValue);
                 // get parameter name, converts to lowercase for comparing strings and trims white space.
                 string parameter = splitValue[0].ToLower().Trim();
                 // check parameter name and when it matches, set the value of the parameter.
@@ -127,37 +89,37 @@ class Config
                 {
                     case "machine_name":
                         parameterValueString = splitValue[1];
-                        setMachineName(parameterValueString);
+                        SetMachineName(parameterValueString);
                         break;
                     case "import_iostat":
-                        setImportIoStat(parameterValueBool);
+                        SetImportIoStat(parameterValueBool);
                         break;
                     case "import_mpstat":
-                        setImportMpStat(parameterValueBool);
+                        SetImportMpStat(parameterValueBool);
                         break;
                     case "import_memfree":
-                        setImportMemFree(parameterValueBool);
+                        SetImportMemFree(parameterValueBool);
                         break;
                     case "import_memswap":
-                        setImportMemSwap(parameterValueBool);
+                        SetImportMemSwap(parameterValueBool);
                         break;
                     case "import_network_stats":
-                        setImportNetStats(parameterValueBool);
+                        SetImportNetStats(parameterValueBool);
                         break;
                     case "import_pidstat":
-                        setImportPidStat(parameterValueBool);
+                        SetImportPidStat(parameterValueBool);
                         break;
                     case "import_pidstat_filter":
-                        // since pidstat_filter accepts comma separated values, we need to remove spaces, capture this and turn it into an array.
+                        // since pidstat_filter accepts comma separated, dynamic values, we need to remove spaces, capture this and turn it into an array.
                         string spacePattern = "\\s+";
                         string spaceReplacement = "";
                         Regex rgx = new Regex(spacePattern);
                         parameterValueString = rgx.Replace(splitValue[1].ToLower(),spaceReplacement);
                         string[] pidStatFilerSplitValue = parameterValueString.Split(pidStatFilterDelimeter);
                         
-                        setPidStatFilter(pidStatFilerSplitValue);
+                        SetPidStatFilter(pidStatFilerSplitValue);
                         break;
-                    default: // deafult exit case.
+                    default:
                     break;
                 }// END switch 
             }// END if line
@@ -165,10 +127,10 @@ class Config
     }// END setConfigVariables
 
     // gets and sets timezone
-    private void setTimeZone()
+    private void SetTimeZone()
     {
         FileHelper fileHelper = new FileHelper("*timezone.out");
-        List<string> configFileContents = fileHelper.readFileByLine();
+        List<string> configFileContents = fileHelper.ReadFileByLine();
         string tz = configFileContents[0].Substring(0,3);
         
         TimeZone = tz;
