@@ -37,6 +37,7 @@ namespace ConsoleApplication
         {
             string outIoStatFileName = "*iostat.out";
             IoStat ioStat = new IoStat(outIoStatFileName);
+            Console.WriteLine(ioStat.getHeader());
             //Type1 type1OutFile = new Type1(outIoStatFileName);
             
 

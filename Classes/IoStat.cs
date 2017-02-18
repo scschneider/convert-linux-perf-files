@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Text;
 using System.Text.RegularExpressions;
 
 class IoStat
@@ -9,30 +10,68 @@ class IoStat
     private List<string> Metrics;
     private List<string> FileContents;
 
-// class constructor
+    // class constructor
     public IoStat(string fileName)
     {
         setFileName(fileName);
         setFileContents();
         setDevices();
         setHeader();
+        setMetrics();
     }
 
-// class private set functions
-
+    // class private set functions
     private void setFileName(string fileName)
     {
         FileName = fileName;
-        MachineName = machineName;
+        //MachineName = machineName;
     }
-
+    private void setFileContents()
+    {
+        FileHelper fileHelper = new FileHelper(FileName);
+        FileContents = fileHelper.readFileByLine();
+    }
     private void setHeader()
     {
-        generateHeader();
+        Header = generateHeader();
     }
     private void setDevices()
     {
-        string emptyLinePattern = "^\r\n";
+        Devices = generateDevices();
+    }
+
+    private void setMetrics()
+    {
+        Metrics = generateMetrics();
+    }
+
+    //class public get functions
+    public string getFileName()
+    {
+        return FileName;
+    }
+    public string getHeader()
+    {
+        return Header;
+    }
+    public List<string> getFileContents()
+    {
+        return FileContents;
+    }
+    public List<string> getMetrics()
+    {
+        return Metrics;
+    }
+    public List<string> getDevices()
+    {
+        return Devices;
+    }
+
+
+    // class functions
+    private List<string> generateDevices()
+    {
+        string emptyLinePattern = "^\\s*$";
         string splitPattern = "\\s+";
 
         Regex rgxEmptyLine = new Regex(emptyLinePattern);
@@ -41,51 +80,49 @@ class IoStat
         int blockCount = 1;
         int block = 0;
         int lineNumber = 4;
-        
+
+        List<string> devices = new List<string>();
+
         while (block < blockCount)
         {
             if (!rgxEmptyLine.IsMatch(FileContents[lineNumber]))
             {
                 string[] thisLineValues = rgxSplitLine.Split(FileContents[lineNumber]);
-                Devices.Add(thisLineValues[0]);
+                devices.Add(thisLineValues[0]);
                 lineNumber++;
             }
-            else {
+            else
+            {
                 block++;
             }
         }
+
+        return devices;
     }
-
-    private void setMetrics()
-    {
-
-    }
-
-
-
-// class functions
-    private void setFileContents()
-    {
-        FileHelper fileHelper = new FileHelper(FileName);
-        FileContents = fileHelper.readFileByLine();
-    }
-
-    private void generateHeader()
+    private string generateHeader()
     {
         string splitPattern = "\\s+";
         Regex rgx = new Regex(splitPattern);
         string[] outHeader = rgx.Split(FileContents[3]);
-        Header += "(PDH-TSV 4.0) (Pacific Daylight Time)(420)";
+        StringBuilder header = new StringBuilder();
+        header.Append("(PDH-TSV 4.0) (Pacific Daylight Time)(420)\t");
 
         foreach (string device in Devices)
         {
-            for (int i = 1; i < outHeader.Length; i++ )
+            for (int i = 1; i < outHeader.Length; i++)
             {
-                Header += "";
+                header.Append("\\\\MACHINENAME\\LogicalDisk(" + device + ")\\" + outHeader[i] + "\t");
             }
         }
-    }
 
+        return header.ToString();
+    }
+    private List<string> generateMetrics()
+    {
+        List<string> metrics = new List<string>();
+
+        return metrics;
+    }
 }
 
 /* EXAMPLE of IoStat file
