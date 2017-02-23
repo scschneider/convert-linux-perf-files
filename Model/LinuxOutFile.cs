@@ -58,4 +58,21 @@ namespace ConvertLinuxPerfFiles.Model
             Metrics = LinuxOutFileHelper.GetIoStatMetrics(this);
         }
     }
+
+    class PidStatFile : LinuxOutFile
+    {
+        private List<long> pids;
+        public List<long> Pids{
+            get { return pids; }
+            set { pids = value; }
+
+        }
+        public PidStatFile(string fileName) :
+            base(fileName)
+        {
+            FileName = fileName;
+            FileContents = new FileReader(fileName).Read();
+
+        }
+    }
 }
