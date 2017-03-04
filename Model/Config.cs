@@ -1,69 +1,34 @@
-using System.Collections.Generic;
+using System;
 using System.Text.RegularExpressions;
-using ConvertLinuxPerfFiles.Model;
 
 namespace ConvertLinuxPerfFiles.Model
 {
     class Config
     {
-        // class variables
-        public string MachineName { get; private set; }
-        public string TimeZone { get; private set; }
-        public bool ImportIoStat { get; private set; }
-        public bool ImportMpStat { get; private set; }
-        public bool ImportMemFree { get; private set; }
-        public bool ImportMemSwap { get; private set; }
-        public bool ImportNetStats { get; private set; }
-        public bool ImportPidStat { get; private set; }
-        public string[] PidStatFilter { get; private set; }
-
         // class constructor
         public Config()
         {
             SetConfigVariables();
             SetTimeZone();
         }
-
-        // class private set functions
-        private void SetMachineName(string value)
-        {
-            MachineName = value;
-        }
-        private void SetImportIoStat(bool value)
-        {
-            ImportIoStat = value;
-        }
-        private void SetImportMpStat(bool value)
-        {
-            ImportMpStat = value;
-        }
-        private void SetImportMemFree(bool value)
-        {
-            ImportMemFree = value;
-        }
-        private void SetImportMemSwap(bool value)
-        {
-            ImportMemSwap = value;
-        }
-        private void SetImportNetStats(bool value)
-        {
-            ImportNetStats = value;
-        }
-        private void SetImportPidStat(bool value)
-        {
-            ImportPidStat = value;
-        }
-        private void SetPidStatFilter(string[] value)
-        {
-            PidStatFilter = value;
-        }
+        
+        // class properties
+        public string MachineName {get; private set;}
+        public int TimeZone {get; private set;}
+        public bool ImportIoStat {get; private set;}
+        public bool ImportMpStat {get; private set;}
+        public bool ImportMemFree {get; private set;}
+        public bool ImportMemSwap {get; private set;}
+        public bool ImportNetStats {get; private set;}
+        public bool ImportPidStat {get; private set;}
+        public string[] PidStatFilter {get; private set;}
 
         // class functions
         private void SetConfigVariables()
         {
             TypeConversionHelper typeConversionHelper = new TypeConversionHelper();
             // need to read config file
-            FileReader fileReader = new FileReader("pssdiag.conf");
+            FileReader fileReader = new FileReader();
             //FileHelper fileHelper = new FileHelper("pssdiag.conf");
             //List<string> configFileContents = fileHelper.ReadFileByLine();
             // delimeter for parameter lines "parameter = value"
@@ -72,7 +37,7 @@ namespace ConvertLinuxPerfFiles.Model
             char pidStatFilterDelimeter = ',';
 
             // itterate through the config file line by line.        
-            foreach (string line in fileReader.Read())
+            foreach (string line in fileReader.Read("pssdiag.conf"))
             {
                 string[] splitValue = { };
                 bool parameterValueBool = false;
@@ -93,25 +58,25 @@ namespace ConvertLinuxPerfFiles.Model
                     {
                         case "machine_name":
                             parameterValueString = splitValue[1];
-                            SetMachineName(parameterValueString);
+                            MachineName = parameterValueString;
                             break;
                         case "import_iostat":
-                            SetImportIoStat(parameterValueBool);
+                            ImportIoStat = parameterValueBool;
                             break;
                         case "import_mpstat":
-                            SetImportMpStat(parameterValueBool);
+                            ImportMpStat = parameterValueBool;
                             break;
                         case "import_memfree":
-                            SetImportMemFree(parameterValueBool);
+                            ImportMemFree = parameterValueBool;
                             break;
                         case "import_memswap":
-                            SetImportMemSwap(parameterValueBool);
+                            ImportMemSwap = parameterValueBool;
                             break;
                         case "import_network_stats":
-                            SetImportNetStats(parameterValueBool);
+                            ImportNetStats = parameterValueBool;
                             break;
                         case "import_pidstat":
-                            SetImportPidStat(parameterValueBool);
+                            ImportPidStat = parameterValueBool;
                             break;
                         case "import_pidstat_filter":
                             // since pidstat_filter accepts comma separated, dynamic values, we need to remove spaces, capture this and turn it into an array.
@@ -121,7 +86,7 @@ namespace ConvertLinuxPerfFiles.Model
                             parameterValueString = rgx.Replace(splitValue[1].ToLower(), spaceReplacement);
                             string[] pidStatFilerSplitValue = parameterValueString.Split(pidStatFilterDelimeter);
 
-                            SetPidStatFilter(pidStatFilerSplitValue);
+                            PidStatFilter = pidStatFilerSplitValue;
                             break;
                         default:
                             break;
@@ -133,8 +98,8 @@ namespace ConvertLinuxPerfFiles.Model
         // gets and sets timezone
         private void SetTimeZone()
         {
-            FileReader fileReader = new FileReader("*timezone.out");
-            string tz = fileReader.Read()[0].Substring(0, 3);
+            FileReader fileReader = new FileReader();
+            int tz = Convert.ToInt16(fileReader.Read("*timezone.out")[0].Substring(0, 3));
 
             TimeZone = tz;
         }// END setTimeZone

@@ -1,62 +1,47 @@
-
-
 using System.Collections.Generic;
 
 namespace ConvertLinuxPerfFiles.Model
 {
     class MyFile
     {
-        private string fileName { get; set; }
-        public string FileName
+        public MyFile()
         {
-            get { return fileName; }
-            private set { fileName = value; }
+
         }
-        public MyFile(string fileName)
-        {
-            FileName = fileName;
-        }
+        public string FileName { get; set; }
     }
 
     class FileReader : MyFile
     {
-        private List<string> fileContents;
-        public FileReader(string fileName) :
-            base(fileName)
+        private List<string> FileContents;
+        public FileReader() :
+            base()
         {
 
         }
-
-        public List<string> Read()
+        public List<string> Read(string fileName)
         {
-            fileContents = MyFileHelper.ReadFileByLine(this);
-            return fileContents;
+            FileName = fileName;
+            FileContents = MyFileHelper.ReadFileByLine(this);
+            return FileContents;
         }
     }
 
     class TsvFileWriter : MyFile
     {
-        private string header;
-        private List<string> metrics;
-        public string Header
+        public TsvFileWriter() :
+                    base()
         {
-            get { return header; }
-            set { header = value; }
+
         }
-        public List<string> Metrics
+        public string Header { get; set; }
+        public List<string> Metrics { get; set; }
+
+        public void Write(string fileName, string header, List<string> metrics)
         {
-            get { return metrics; }
-            private set { metrics = value; }
-        }
-        public TsvFileWriter(string fileName, string header, List<string> metrics) :
-            base(fileName)
-        {
+            FileName = fileName;
             Header = header;
             Metrics = metrics;
-        }
-
-        public void Write()
-        {
             MyFileHelper.WriteTsvFileByLine(this);
         }
     }

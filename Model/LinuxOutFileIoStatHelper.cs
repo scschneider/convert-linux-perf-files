@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 
 namespace ConvertLinuxPerfFiles.Model
 {
-    class LinuxOutFileHelper
+    class LinuxOutFileIoStatHelper
     {
         public static List<string> GetIoStatDevices(IoStatFile ioStatFile)
         {
@@ -95,6 +95,8 @@ namespace ConvertLinuxPerfFiles.Model
 
             return metrics;
         }// END GenerateMetrics
+
+        
     }
 }
 

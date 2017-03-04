@@ -1,14 +1,14 @@
 using System.Collections.Generic;
-using ConvertLinuxPerfFiles.Model;
+// using ConvertLinuxPerfFiles.Model;
 
 namespace ConvertLinuxPerfFiles.Model
 {
     class LinuxOutFile
     {
-        string fileName;
-        List<string> fileContents;
-        string header;
-        List<string> metrics;
+        private string fileName;
+        private List<string> fileContents;
+        private string header;
+        private List<string> metrics;
 
         public string FileName
         {
@@ -36,7 +36,7 @@ namespace ConvertLinuxPerfFiles.Model
 
         public LinuxOutFile(string fileName)
         {
-
+            
         }
     }
 
@@ -52,17 +52,23 @@ namespace ConvertLinuxPerfFiles.Model
             base(fileName)
         {
             FileName = fileName;
-            FileContents = new FileReader(fileName).Read();
-            Devices = LinuxOutFileHelper.GetIoStatDevices(this);
-            Header = LinuxOutFileHelper.GetIoStatHeader(this);
-            Metrics = LinuxOutFileHelper.GetIoStatMetrics(this);
+        }
+        public IoStatFile GetNormalizedContent()
+        {
+            FileContents = new FileReader().Read(FileName);
+            Devices = LinuxOutFileIoStatHelper.GetIoStatDevices(this);
+            Header = LinuxOutFileIoStatHelper.GetIoStatHeader(this);
+            Metrics = LinuxOutFileIoStatHelper.GetIoStatMetrics(this);
+            
+            return this;
         }
     }
 
     class PidStatFile : LinuxOutFile
     {
         private List<long> pids;
-        public List<long> Pids{
+        public List<long> Pids
+        {
             get { return pids; }
             set { pids = value; }
 
@@ -71,8 +77,12 @@ namespace ConvertLinuxPerfFiles.Model
             base(fileName)
         {
             FileName = fileName;
-            FileContents = new FileReader(fileName).Read();
+        }
 
+        public PidStatFile GetNormalizedContent()
+        {
+            FileContents = new FileReader().Read(FileName);
+            return this;
         }
     }
 }
