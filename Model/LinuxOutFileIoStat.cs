@@ -2,12 +2,29 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
+using ConvertLinuxPerfFiles.Utility;
 
 namespace ConvertLinuxPerfFiles.Model
 {
-    class LinuxOutFileIoStatHelper
+    class LinuxOutFileIoStat : LinuxOutFile
     {
-        public static List<string> GetIoStatDevices(IoStatFile ioStatFile)
+        public LinuxOutFileIoStat(string ioStatFileName, int timeZone = 0) :
+            base(ioStatFileName, timeZone)
+        {
+            FileName = ioStatFileName;
+            FileContents = GetIoStatFileContents();
+            Devices = GetIoStatDevices();
+            Header = GetIoStatHeader();
+            Metrics = GetIoStatMetrics();
+        }
+
+        private List<string> Devices { get; set; }
+
+        private List<string> GetIoStatFileContents()
+        {
+            return new FileUtility().ReadFileByLine(FileName);
+        }
+        private List<string> GetIoStatDevices()
         {
             string emptyLinePattern = "^\\s*$";
             string splitPattern = "\\s+";
@@ -23,9 +40,9 @@ namespace ConvertLinuxPerfFiles.Model
 
             while (block < blockCount)
             {
-                if (!rgxEmptyLine.IsMatch(ioStatFile.FileContents[lineNumber]))
+                if (!rgxEmptyLine.IsMatch(FileContents[lineNumber]))
                 {
-                    string[] thisLineValues = rgxSplitLine.Split(ioStatFile.FileContents[lineNumber]);
+                    string[] thisLineValues = rgxSplitLine.Split(FileContents[lineNumber]);
                     devices.Add(thisLineValues[0]);
                     lineNumber++;
                 }
@@ -37,15 +54,15 @@ namespace ConvertLinuxPerfFiles.Model
 
             return devices;
         }
-        public static string GetIoStatHeader(IoStatFile ioStatFile)
+        private string GetIoStatHeader()
         {
             string splitPattern = "\\s+";
             Regex rgx = new Regex(splitPattern);
-            string[] outHeader = rgx.Split(ioStatFile.FileContents[3]);
+            string[] outHeader = rgx.Split(FileContents[3]);
             StringBuilder header = new StringBuilder();
             header.Append('"' + "(PDH-TSV 4.0) (Pacific Daylight Time)(420)" + '"' + "\t");
 
-            foreach (string device in ioStatFile.Devices)
+            foreach (string device in Devices)
             {
                 for (int i = 1; i < outHeader.Length; i++)
                 {
@@ -56,7 +73,7 @@ namespace ConvertLinuxPerfFiles.Model
             return header.ToString();
         }// END GenerateHeader
 
-        public static List<string> GetIoStatMetrics(IoStatFile ioStatFile)
+        private List<string> GetIoStatMetrics()
         {
             List<string> metrics = new List<string>();
 
@@ -66,23 +83,23 @@ namespace ConvertLinuxPerfFiles.Model
             Regex rgxEmptyLine = new Regex(emptyLinePattern);
             Regex rgxSplitLine = new Regex(splitPattern);
 
-            int deviceCount = ioStatFile.Devices.Count;
+            int deviceCount = Devices.Count;
 
-            for (int i = 0; i < ioStatFile.FileContents.Count; i++)
+            for (int i = 0; i < FileContents.Count; i++)
             {
                 DateTime timeStamp = new DateTime();
                 StringBuilder thisMetricSample = new StringBuilder();
 
-                if (rgxEmptyLine.IsMatch(ioStatFile.FileContents[i]) && i < ioStatFile.FileContents.Count - 1)
+                if (rgxEmptyLine.IsMatch(FileContents[i]) && i < FileContents.Count - 1)
                 {
                     string timeStampFormatted;
-                    timeStamp = DateTime.Parse(ioStatFile.FileContents[(i + 1)]);
+                    timeStamp = DateTime.Parse(FileContents[(i + 1)]);
                     timeStampFormatted = timeStamp.ToString("MM/dd/yyyy H:mm:ss");
-                    thisMetricSample.Append('"' + timeStampFormatted + '"'  + "\t");
+                    thisMetricSample.Append('"' + timeStampFormatted + '"' + "\t");
 
                     for (int x = (i + 3); x < i + deviceCount; x++)
                     {
-                        string[] thisLineContents = rgxSplitLine.Split(ioStatFile.FileContents[x]);
+                        string[] thisLineContents = rgxSplitLine.Split(FileContents[x]);
 
                         for (int z = 1; z < thisLineContents.Length; z++)
                         {
@@ -95,8 +112,6 @@ namespace ConvertLinuxPerfFiles.Model
 
             return metrics;
         }// END GenerateMetrics
-
-        
     }
 }
 

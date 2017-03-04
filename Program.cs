@@ -1,4 +1,5 @@
 using ConvertLinuxPerfFiles.Model;
+using ConvertLinuxPerfFiles.Utility;
 
 namespace ConvertLinuxPerfFiles
 {
@@ -11,13 +12,13 @@ namespace ConvertLinuxPerfFiles
 
             Config config = new Config();
 
-            IoStatFile ioStatFile = new IoStatFile(ioStatFileName).GetNormalizedContent();
-            LinuxOutFilePidStatHelper linuxOutFilePidStatHelper = new LinuxOutFilePidStatHelper(pidStatFileName, config.TimeZone, config.PidStatFilter);
+            LinuxOutFileIoStat ioStat = new LinuxOutFileIoStat(ioStatFileName);
+            LinuxOutFilePidStat pidStat = new LinuxOutFilePidStat(pidStatFileName, config.TimeZone, config.PidStatFilter);
         
-            TsvFileWriter tsvFileWriter = new TsvFileWriter();
-
-            tsvFileWriter.Write(ioStatFileName, ioStatFile.Header, ioStatFile.Metrics);
-            tsvFileWriter.Write(pidStatFileName, linuxOutFilePidStatHelper.Header, linuxOutFilePidStatHelper.Metrics);
+            FileUtility fileUtility = new FileUtility();
+            
+            fileUtility.WriteTsvFileByLine(ioStatFileName, ioStat.Header, ioStat.Metrics);
+            fileUtility.WriteTsvFileByLine(pidStatFileName, pidStat.Header, pidStat.Metrics);
         }// END Main
     }// END Program
 }// END Namespace ConvertLinuxPerfFiles

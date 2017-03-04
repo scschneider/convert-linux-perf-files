@@ -1,5 +1,6 @@
 using System;
 using System.Text.RegularExpressions;
+using ConvertLinuxPerfFiles.Utility;
 
 namespace ConvertLinuxPerfFiles.Model
 {
@@ -11,24 +12,24 @@ namespace ConvertLinuxPerfFiles.Model
             SetConfigVariables();
             SetTimeZone();
         }
-        
+
         // class properties
-        public string MachineName {get; private set;}
-        public int TimeZone {get; private set;}
-        public bool ImportIoStat {get; private set;}
-        public bool ImportMpStat {get; private set;}
-        public bool ImportMemFree {get; private set;}
-        public bool ImportMemSwap {get; private set;}
-        public bool ImportNetStats {get; private set;}
-        public bool ImportPidStat {get; private set;}
-        public string[] PidStatFilter {get; private set;}
+        public string MachineName { get; private set; }
+        public int TimeZone { get; private set; }
+        public bool ImportIoStat { get; private set; }
+        public bool ImportMpStat { get; private set; }
+        public bool ImportMemFree { get; private set; }
+        public bool ImportMemSwap { get; private set; }
+        public bool ImportNetStats { get; private set; }
+        public bool ImportPidStat { get; private set; }
+        public string[] PidStatFilter { get; private set; }
 
         // class functions
         private void SetConfigVariables()
         {
-            TypeConversionHelper typeConversionHelper = new TypeConversionHelper();
+            TypeConversion typeConversion = new TypeConversion();
             // need to read config file
-            FileReader fileReader = new FileReader();
+            FileUtility fileUtility = new FileUtility();
             //FileHelper fileHelper = new FileHelper("pssdiag.conf");
             //List<string> configFileContents = fileHelper.ReadFileByLine();
             // delimeter for parameter lines "parameter = value"
@@ -37,7 +38,7 @@ namespace ConvertLinuxPerfFiles.Model
             char pidStatFilterDelimeter = ',';
 
             // itterate through the config file line by line.        
-            foreach (string line in fileReader.Read("pssdiag.conf"))
+            foreach (string line in fileUtility.ReadFileByLine("pssdiag.conf"))
             {
                 string[] splitValue = { };
                 bool parameterValueBool = false;
@@ -50,7 +51,7 @@ namespace ConvertLinuxPerfFiles.Model
                     splitValue = line.Split(parameterDelimeter);
                     // the configuration file allows for values of true/false and yes/no. this will convert those to bool values.
                     string parameterValue = splitValue[1].ToLower();
-                    parameterValueBool = typeConversionHelper.ConvertTypeToBool(parameterValue);
+                    parameterValueBool = typeConversion.ConvertTypeToBool(parameterValue);
                     // get parameter name, converts to lowercase for comparing strings and trims white space.
                     string parameter = splitValue[0].ToLower().Trim();
                     // check parameter name and when it matches, set the value of the parameter.
@@ -90,18 +91,18 @@ namespace ConvertLinuxPerfFiles.Model
                             break;
                         default:
                             break;
-                    }// END switch 
-                }// END if line
-            };// END foreach line
-        }// END setConfigVariables
+                    }
+                }
+            };
+        }
 
         // gets and sets timezone
         private void SetTimeZone()
         {
-            FileReader fileReader = new FileReader();
-            int tz = Convert.ToInt16(fileReader.Read("*timezone.out")[0].Substring(0, 3));
+            FileUtility fileUtility = new FileUtility();
+            int tz = Convert.ToInt16(fileUtility.ReadFileByLine("*timezone.out")[0].Substring(0, 3));
 
             TimeZone = tz;
-        }// END setTimeZone
+        }
     }
 }
