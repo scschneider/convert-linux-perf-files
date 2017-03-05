@@ -1,44 +1,54 @@
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Text.RegularExpressions;
 using ConvertLinuxPerfFiles.Utility;
 
-namespace ConvertLinuxPerfFiles.Model
+namespace ConvertLinuxPerfFiles
 {
+    // since this configuration file gives instructions throughout the program, it is created as a global class
+    public static class ConfigValues
+    {
+        public static string MachineName { get; set; }
+        public static int TimeZone { get; set; }
+        public static bool ImportIoStat { get; set; }
+        public static bool ImportMpStat { get; set; }
+        public static bool ImportMemFree { get; set; }
+        public static bool ImportMemSwap { get; set; }
+        public static bool ImportNetStats { get; set; }
+        public static bool ImportPidStat { get; set; }
+        public static string[] PidStatFilter { get; set; }
+        public static bool DebugImport { get; set; }
+    }
     class Config
     {
         // class constructor
         public Config()
         {
-            SetConfigVariables();
-            SetTimeZone();
+            FileContents = GetFileContents(); 
+            GetConfigVariables();
+            GetMachineName();
+            GetTimeZone();
         }
 
-        // class properties
-        public string MachineName { get; private set; }
-        public int TimeZone { get; private set; }
-        public bool ImportIoStat { get; private set; }
-        public bool ImportMpStat { get; private set; }
-        public bool ImportMemFree { get; private set; }
-        public bool ImportMemSwap { get; private set; }
-        public bool ImportNetStats { get; private set; }
-        public bool ImportPidStat { get; private set; }
-        public string[] PidStatFilter { get; private set; }
+        private List<string> FileContents { get; set; }
 
         // class functions
-        private void SetConfigVariables()
+        private List<string> GetFileContents()
         {
-            TypeConversion typeConversion = new TypeConversion();
-            // need to read config file
-            FileUtility fileUtility = new FileUtility();
-            //FileHelper fileHelper = new FileHelper("pssdiag.conf");
-            //List<string> configFileContents = fileHelper.ReadFileByLine();
+            return new FileUtility().ReadFileByLine("pssdiag.conf");
+        }
+        private void GetConfigVariables()
+        {
+            TypeConversionUtility typeConversion = new TypeConversionUtility();
+
             // delimeter for parameter lines "parameter = value"
             char parameterDelimeter = '=';
             // delimeter for pidstat filter value "sqlservr,sqlcmd"
             char pidStatFilterDelimeter = ',';
 
             // itterate through the config file line by line.        
-            foreach (string line in fileUtility.ReadFileByLine("pssdiag.conf"))
+            foreach (string line in FileContents)
             {
                 string[] splitValue = { };
                 bool parameterValueBool = false;
@@ -54,30 +64,30 @@ namespace ConvertLinuxPerfFiles.Model
                     parameterValueBool = typeConversion.ConvertTypeToBool(parameterValue);
                     // get parameter name, converts to lowercase for comparing strings and trims white space.
                     string parameter = splitValue[0].ToLower().Trim();
-                    // check parameter name and when it matches, set the value of the parameter.
+                    // check parameter name and when it matches, set the value of that parameter property.
                     switch (parameter)
                     {
                         case "machine_name":
                             parameterValueString = splitValue[1];
-                            MachineName = parameterValueString;
+                            ConfigValues.MachineName = parameterValueString;
                             break;
                         case "import_iostat":
-                            ImportIoStat = parameterValueBool;
+                            ConfigValues.ImportIoStat = parameterValueBool;
                             break;
                         case "import_mpstat":
-                            ImportMpStat = parameterValueBool;
+                            ConfigValues.ImportMpStat = parameterValueBool;
                             break;
                         case "import_memfree":
-                            ImportMemFree = parameterValueBool;
+                            ConfigValues.ImportMemFree = parameterValueBool;
                             break;
                         case "import_memswap":
-                            ImportMemSwap = parameterValueBool;
+                            ConfigValues.ImportMemSwap = parameterValueBool;
                             break;
                         case "import_network_stats":
-                            ImportNetStats = parameterValueBool;
+                            ConfigValues.ImportNetStats = parameterValueBool;
                             break;
                         case "import_pidstat":
-                            ImportPidStat = parameterValueBool;
+                            ConfigValues.ImportPidStat = parameterValueBool;
                             break;
                         case "import_pidstat_filter":
                             // since pidstat_filter accepts comma separated, dynamic values, we need to remove spaces, capture this and turn it into an array.
@@ -87,22 +97,33 @@ namespace ConvertLinuxPerfFiles.Model
                             parameterValueString = rgx.Replace(splitValue[1].ToLower(), spaceReplacement);
                             string[] pidStatFilerSplitValue = parameterValueString.Split(pidStatFilterDelimeter);
 
-                            PidStatFilter = pidStatFilerSplitValue;
+                            ConfigValues.PidStatFilter = pidStatFilerSplitValue;
                             break;
                         default:
                             break;
                     }
                 }
+                else if (line.StartsWith("#"))
+                {
+                    Globals.log.WriteLog("Ignoring line: " + line, "SetConfigVariables", "[Config]");
+                }
             };
         }
 
         // gets and sets timezone
-        private void SetTimeZone()
+        private void GetTimeZone()
         {
             FileUtility fileUtility = new FileUtility();
             int tz = Convert.ToInt16(fileUtility.ReadFileByLine("*timezone.out")[0].Substring(0, 3));
 
-            TimeZone = tz;
+            ConfigValues.TimeZone = tz;
+        }
+
+        private void GetMachineName()
+        {
+            string machineName = Directory.GetFiles(".\\","*_machineconfig.log")[0];
+            machineName = machineName.Split('_')[0];
+            ConfigValues.MachineName = machineName.Replace(".\\","");
         }
     }
 }

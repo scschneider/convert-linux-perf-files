@@ -8,71 +8,51 @@ namespace ConvertLinuxPerfFiles.Model
 {
     class LinuxOutFileIoStat : LinuxOutFile
     {
-        public LinuxOutFileIoStat(string ioStatFileName, int timeZone = 0) :
-            base(ioStatFileName, timeZone)
+        // class constructor
+        public LinuxOutFileIoStat(string ioStatFileName) :
+            base(ioStatFileName)
         {
-            FileName = ioStatFileName;
             FileContents = GetIoStatFileContents();
             Devices = GetIoStatDevices();
             Header = GetIoStatHeader();
             Metrics = GetIoStatMetrics();
         }
-
+        // class properties
         private List<string> Devices { get; set; }
-
+        
+        // class methods
+        // Reads file contents
         private List<string> GetIoStatFileContents()
         {
             return new FileUtility().ReadFileByLine(FileName);
         }
+
+        // since the devices are listed within the block, we need to get a list of the for generating the header
         private List<string> GetIoStatDevices()
         {
-            string emptyLinePattern = "^\\s*$";
-            string splitPattern = "\\s+";
+            int startingLine = 4;
+            int deviceColumnNumber = 0;
 
-            Regex rgxEmptyLine = new Regex(emptyLinePattern);
-            Regex rgxSplitLine = new Regex(splitPattern);
-
-            int blockCount = 1;
-            int block = 0;
-            int lineNumber = 4;
-
-            List<string> devices = new List<string>();
-
-            while (block < blockCount)
-            {
-                if (!rgxEmptyLine.IsMatch(FileContents[lineNumber]))
-                {
-                    string[] thisLineValues = rgxSplitLine.Split(FileContents[lineNumber]);
-                    devices.Add(thisLineValues[0]);
-                    lineNumber++;
-                }
-                else
-                {
-                    block++;
-                }
-            }
-
-            return devices;
+            return new LinuxOutFileHelper().GetDevices(startingLine, FileContents, deviceColumnNumber);
         }
+
+        // generates the header that gets written to the TSV file
         private string GetIoStatHeader()
         {
-            string splitPattern = "\\s+";
-            Regex rgx = new Regex(splitPattern);
-            string[] outHeader = rgx.Split(FileContents[3]);
-            StringBuilder header = new StringBuilder();
-            header.Append('"' + "(PDH-TSV 4.0) (Pacific Daylight Time)(420)" + '"' + "\t");
-
-            foreach (string device in Devices)
+            // creating the outheader object and passing in variables on where to start parsing specific strings
+            OutHeader outHeader = new OutHeader()
             {
-                for (int i = 1; i < outHeader.Length; i++)
-                {
-                    header.Append('"' + "\\\\MACHINENAME\\LogicalDisk(" + device + ")\\" + outHeader[i] + '"' + "\t");
-                }
-            }// END foreach device
+                StartingColumn = 1,
+                StartingRow = 3,
+                FileContents = FileContents,
+                Devices = Devices,
+                ObjectName = "Logicaldisk"
+            };
 
-            return header.ToString();
-        }// END GenerateHeader
+            return new LinuxOutFileHelper().GetHeader(outHeader);
+        }
 
+        // generates the metrics that get written to the tsv file
         private List<string> GetIoStatMetrics()
         {
             List<string> metrics = new List<string>();
@@ -85,22 +65,27 @@ namespace ConvertLinuxPerfFiles.Model
 
             int deviceCount = Devices.Count;
 
+            // itterate through each line in filecontents
             for (int i = 0; i < FileContents.Count; i++)
             {
                 DateTime timeStamp = new DateTime();
                 StringBuilder thisMetricSample = new StringBuilder();
 
+                // this file is in a block format and we use empty lines to determin when to start parsing the next metric
                 if (rgxEmptyLine.IsMatch(FileContents[i]) && i < FileContents.Count - 1)
                 {
                     string timeStampFormatted;
                     timeStamp = DateTime.Parse(FileContents[(i + 1)]);
-                    timeStampFormatted = timeStamp.ToString("MM/dd/yyyy H:mm:ss");
+                    timeStampFormatted = new DateTimeUtility().DateTime24HourFormat(timeStamp);
                     thisMetricSample.Append('"' + timeStampFormatted + '"' + "\t");
 
+                    // looping through the logical disk devices 
                     for (int x = (i + 3); x < i + deviceCount; x++)
                     {
+                        // splitting the contents of the current line to grab the metrics
                         string[] thisLineContents = rgxSplitLine.Split(FileContents[x]);
 
+                        // looping through the split line contents and start at column 1
                         for (int z = 1; z < thisLineContents.Length; z++)
                         {
                             thisMetricSample.Append('"' + thisLineContents[z] + '"' + "\t");
@@ -111,7 +96,7 @@ namespace ConvertLinuxPerfFiles.Model
             }
 
             return metrics;
-        }// END GenerateMetrics
+        }
     }
 }
 

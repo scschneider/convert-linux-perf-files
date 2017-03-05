@@ -2,13 +2,16 @@ using System.Collections.Generic;
 
 namespace ConvertLinuxPerfFiles.Model
 {
+    // parent class for the Linux out file child classes. The common properties and constructor used by the child classes
     class LinuxOutFile
     {
-        public LinuxOutFile(string fileName, int timeZone)
+        // class constructor
+        public LinuxOutFile(string fileName)
         {
-            TimeZone = timeZone;
+            TimeZone = ConfigValues.TimeZone;
             FileName = fileName;
         }
+        // class properties
         public string FileName { get; set; }
         public List<string> FileContents { get; set; }
         public int TimeZone { get; set; }

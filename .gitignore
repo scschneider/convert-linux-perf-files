@@ -4,3 +4,5 @@ pssdiag.conf
 /bin
 /obj
 /.vscode
+ImportLog.log
+*_machineconfig.log
