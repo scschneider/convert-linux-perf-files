@@ -10,6 +10,7 @@ namespace ConvertLinuxPerfFiles.Model
         {
             TimeZone = ConfigValues.TimeZone;
             FileName = fileName;
+            FileContents = new Utility.FileUtility().ReadFileByLine(FileName);
         }
         // class properties
         public string FileName { get; set; }

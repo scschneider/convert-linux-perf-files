@@ -6,3 +6,4 @@ pssdiag.conf
 /.vscode
 ImportLog.log
 *_machineconfig.log
+*.tar.gz

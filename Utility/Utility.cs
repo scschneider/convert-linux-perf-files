@@ -17,15 +17,31 @@ namespace ConvertLinuxPerfFiles.Utility
             dt = epoch.AddSeconds(unixTime).AddHours(timeZone);
             return DateTime24HourFormat(dt);
         }
-
+        // converts time to 24 hours
         public string DateTime24HourFormat(DateTime dateToFormat)
         {
-            return dateToFormat.ToString("MM/dd/yyyy H:mm:ss");
+            return dateToFormat.ToString("MM/dd/yyyy HH:mm:ss");
+        }
+
+        // converts the time to 24 hours and since the out files do not increment 
+        // the day when metrics roll over into a new day, we need to provide the logic to do so.
+        public string DateTime24HourFormat(DateTime dateToFormat, int lastTimeStampHour)
+        {
+            int currentTimeStampHour = Convert.ToInt16(dateToFormat.ToString("HH"));
+            
+            if (currentTimeStampHour >= lastTimeStampHour || lastTimeStampHour == -1)
+            {
+                return dateToFormat.ToString("MM/dd/yyyy HH:mm:ss");
+            }
+            else {
+                return dateToFormat.AddDays(1).ToString("MM/dd/yyyy HH:mm:ss");
+            }
         }
     }
 
     class FileUtility
     {
+        // reads files line by line
         public List<string> ReadFileByLine(string file)
         {
             List<string> returnValue = new List<string>();
@@ -49,6 +65,7 @@ namespace ConvertLinuxPerfFiles.Utility
 
             return returnValue;
         }
+        // writes the converted tsv results to tsv file
         public void WriteTsvFileByLine(string file, string header, List<string> metrics)
         {
             try
@@ -72,6 +89,7 @@ namespace ConvertLinuxPerfFiles.Utility
             }
 
         }
+        // returns the full path to the file. we pass in a wildcard value and need this when opening a file
         public static string GetFullFilePath(string file)
         {
             string currentDirectory = Directory.GetCurrentDirectory();
@@ -87,6 +105,7 @@ namespace ConvertLinuxPerfFiles.Utility
                 throw;
             }
         }
+        // this changes the file name from the original .out filename to .tsv. the result of this is used to name the tsv file
         public static string SetTsvFileName(string file)
         {
             try
@@ -103,7 +122,7 @@ namespace ConvertLinuxPerfFiles.Utility
             }
         }
     }
-
+    // used to convert common true,yes,1/false,no,0 values to bool
     class TypeConversionUtility
     {
         public bool ConvertTypeToBool(string typeValue)

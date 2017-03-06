@@ -13,7 +13,6 @@ namespace ConvertLinuxPerfFiles.Model
         public LinuxOutFilePidStat(string pidStatFileName) :
             base(pidStatFileName)
         {
-            FileContents = GetPidStatFileContents();
             Processes = GetProcessMetrics();
             UniquePids = GetUniquePids();
             Header = GetPidStatHeader();
@@ -27,11 +26,6 @@ namespace ConvertLinuxPerfFiles.Model
         private Dictionary<long, string> UniquePids;
 
         // class methods
-        // Reads file contents
-        private List<string> GetPidStatFileContents()
-        {
-            return new Utility.FileUtility().ReadFileByLine(FileName);
-        }
         // Reads each line where there are metrics, creates a process object and adds it to the objects collection
         public List<Process> GetProcessMetrics()
         {
@@ -44,6 +38,9 @@ namespace ConvertLinuxPerfFiles.Model
 
             Regex rgxEmptyLine = new Regex(emptyLinePattern);
             Regex rgxSplitLine = new Regex(splitPattern);
+
+            Progress progress = new Progress();
+            progress.WriteTitle("Reading PID file, filtering results and adding to collection.");
 
             // starting at the first line where # appears
             for (int i = 3; i <= FileContents.Count - 1;)
@@ -84,16 +81,18 @@ namespace ConvertLinuxPerfFiles.Model
                         ProcessName = thisProcessName,
                         Metrics = theseMetrics
                     };
-                    
-                    // we need to filter out what gets collected based on fthe PidFilter in the config file.
+
+                    // we need to filter out what gets collected based on the PidFilter in the config file.
                     if (ConfigValues.PidStatFilter.Count() != -1 && ConfigValues.PidStatFilter.Contains(process.ProcessName))
                     {
+                        progress.WriteProgress(i,FileContents.Count);
                         // once we are done generating the process object, we add the object to the collection of processes
                         processes.Add(process);
                     }
-
+                    // if there are no filters, we need to add everything
                     if (ConfigValues.PidStatFilter[0] == "" || ConfigValues.PidStatFilter[0] == "false")
                     {
+                        progress.WriteProgress(i,FileContents.Count);
                         // once we are done generating the process object, we add the object to the collection of processes
                         processes.Add(process);
                     }
@@ -110,6 +109,10 @@ namespace ConvertLinuxPerfFiles.Model
         // from previous blocks, we need to get this information up front before processing the results
         private Dictionary<long, string> GetUniquePids()
         {
+            Progress progress = new Progress();
+            
+            progress.WriteTitle("Filtering out unique PIDs");
+
             Dictionary<long, string> unique = new Dictionary<long, string>();
             unique = Processes.Select(x => new { x.Pid, x.ProcessName }).Distinct().OrderBy(Pid => Pid.Pid).ToDictionary(x => x.Pid, x => x.ProcessName);
 
@@ -118,36 +121,33 @@ namespace ConvertLinuxPerfFiles.Model
         // now that we have the unique pids, we can create the header
         private string GetPidStatHeader()
         {
-            string splitPattern = "\\s+";
-            Regex rgxSplitLine = new Regex(splitPattern);
-            // splitting the contents of the line that has the raw header data
-            string[] rawHeader = rgxSplitLine.Split(FileContents[3]);
-            StringBuilder header = new StringBuilder();
-            header.Append('"' + "(PDH-TSV 4.0) (Pacific Daylight Time)(420)" + '"' + "\t");
-
-            foreach (var i in UniquePids)
+            // creating the outheader object and passing in variables on where to start parsing specific strings
+            OutHeader outHeader = new OutHeader()
             {
-                // loop to read the header names that we will us in Perfmon. we start at the first 
-                // occurence of a header name and go unitl the hit the column before the 
-                // last one since the last column contains the process name.
-                for (int j = 4; j <= (rawHeader.Count() - 2); j++)
-                {
-                    // this generated the header that will get used for the TSV file. example output "\\MACHINENAME\Process(sqlservr#19155)\%usr"
-                    header.Append('"' + "\\\\" + ConfigValues.MachineName + "\\Process(" + i.Value + "#" + i.Key + ")\\" + rawHeader[j] + '"' + "\t");
-                }
-            }
+                StartingColumn = 4,
+                StartingRow = 3,
+                FileContents = FileContents,
+                Devices = UniquePids.Select(x => x.Value + "#" + x.Key).ToList(),
+                ObjectName = "Process"
+            };
 
-            return header.ToString();
+            return new LinuxOutFileHelper().GetHeader(outHeader);
         }
 
         // generating the useful data for the metrics section of the TSV file
         private List<string> GetPidStatMetrics()
         {
+            Progress progress = new Progress();
+            progress.WriteTitle("Parsing PID metrics");
+
+            int c = 0;
             // create the collection that each generated line will be placed in
             List<string> metrics = new List<string>();
             // loop through every process in processes
             foreach (Process process in Processes)
             {
+                c++;
+                progress.WriteProgress(c,Processes.Count);
                 // create the object that each metric will get appended to
                 StringBuilder metric = new StringBuilder();
                 // each metric line starts with a timestamp
