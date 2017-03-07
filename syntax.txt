@@ -1,0 +1,2 @@
+#publish application
+dotnet publish --configuration Release -r win81-x64

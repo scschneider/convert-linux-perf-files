@@ -18,7 +18,7 @@ namespace ConvertLinuxPerfFiles.Model
         }
         // class properties
         private List<string> Devices { get; set; }
-        
+
         // class methods
         // since the devices are listed within the block, we need to get a list of the for generating the header
         private List<string> GetIoStatDevices()
@@ -48,8 +48,9 @@ namespace ConvertLinuxPerfFiles.Model
         // generates the metrics that get written to the tsv file
         private List<string> GetIoStatMetrics()
         {
-            Progress progress = new Progress();
-            progress.WriteTitle("Parsing IOStat metrics");
+            // int progressLine = 0;
+            // Progress progress = new Progress();
+            // progress.WriteTitle("Parsing IOStat metrics",progressLine);
 
             List<string> metrics = new List<string>();
 
@@ -64,19 +65,18 @@ namespace ConvertLinuxPerfFiles.Model
             // itterate through each line in filecontents
             for (int i = 0; i < FileContents.Count; i++)
             {
-                progress.WriteProgress(i,FileContents.Count);
-                
+                // progress.WriteProgress(i, FileContents.Count,progressLine);
+
                 DateTime timeStamp = new DateTime();
                 StringBuilder thisMetricSample = new StringBuilder();
-                int lastTimeStampHour = -1;
 
                 // this file is in a block format and we use empty lines to determin when to start parsing the next metric
                 if (rgxEmptyLine.IsMatch(FileContents[i]) && i < FileContents.Count - 1)
                 {
+                    // we don't need to increment day since iostat increments automatically.
                     string timeStampFormatted;
                     timeStamp = DateTime.Parse(FileContents[(i + 1)]);
-                    timeStampFormatted = new DateTimeUtility().DateTime24HourFormat(timeStamp, lastTimeStampHour);
-                    lastTimeStampHour = Convert.ToInt16(timeStamp.ToString("HH"));
+                    timeStampFormatted = new DateTimeUtility().DateTime24HourFormat(timeStamp);
                     thisMetricSample.Append('"' + timeStampFormatted + '"' + "\t");
 
                     // looping through the logical disk devices 

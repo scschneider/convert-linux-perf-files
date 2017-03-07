@@ -18,16 +18,17 @@ namespace ConvertLinuxPerfFiles
         public static bool ImportNetStats { get; set; }
         public static bool ImportPidStat { get; set; }
         public static string[] PidStatFilter { get; set; }
-        public static bool DebugImport { get; set; }
+        public static bool ImportCombine { get; set; }
+        public static int ProgressLine { get; set; }
     }
     class Config
     {
         // class constructor
         public Config()
         {
-            FileContents = GetFileContents(); 
-            GetConfigVariables();
             GetMachineName();
+            FileContents = GetFileContents();
+            GetConfigVariables();
             GetTimeZone();
         }
 
@@ -70,24 +71,31 @@ namespace ConvertLinuxPerfFiles
                         case "machine_name":
                             parameterValueString = splitValue[1];
                             ConfigValues.MachineName = parameterValueString;
+                            Globals.log.WriteLog(parameterValueString,"machine_name","[Config]");
                             break;
                         case "import_iostat":
                             ConfigValues.ImportIoStat = parameterValueBool;
+                            Globals.log.WriteLog(parameterValueBool.ToString(),"import_iostat","[Config]");
                             break;
                         case "import_mpstat":
                             ConfigValues.ImportMpStat = parameterValueBool;
+                            Globals.log.WriteLog(parameterValueBool.ToString(),"import_mpstat","[Config]");
                             break;
                         case "import_memfree":
                             ConfigValues.ImportMemFree = parameterValueBool;
+                            Globals.log.WriteLog(parameterValueBool.ToString(),"import_memfree","[Config]");
                             break;
                         case "import_memswap":
                             ConfigValues.ImportMemSwap = parameterValueBool;
+                            Globals.log.WriteLog(parameterValueBool.ToString(),"import_memswap","[Config]");
                             break;
                         case "import_network_stats":
                             ConfigValues.ImportNetStats = parameterValueBool;
+                            Globals.log.WriteLog(parameterValueBool.ToString(),"import_network_stats","[Config]");
                             break;
                         case "import_pidstat":
                             ConfigValues.ImportPidStat = parameterValueBool;
+                            Globals.log.WriteLog(parameterValueBool.ToString(),"import_pidstat","[Config]");
                             break;
                         case "import_pidstat_filter":
                             // since pidstat_filter accepts comma separated, dynamic values, we need to remove spaces, capture this and turn it into an array.
@@ -98,6 +106,11 @@ namespace ConvertLinuxPerfFiles
                             string[] pidStatFilerSplitValue = parameterValueString.Split(pidStatFilterDelimeter);
 
                             ConfigValues.PidStatFilter = pidStatFilerSplitValue;
+                            Globals.log.WriteLog(parameterValueString,"import_pidstat_filter","[Config]");
+                            break;
+                        case "import_combine_perfmon_files":
+                            ConfigValues.ImportCombine = parameterValueBool;
+                            Globals.log.WriteLog(parameterValueBool.ToString(),"import_combine_perfmon_files","[Config]");
                             break;
                         default:
                             break;
@@ -121,9 +134,10 @@ namespace ConvertLinuxPerfFiles
 
         private void GetMachineName()
         {
-            string machineName = Directory.GetFiles(".\\","*_machineconfig.log")[0];
+            string machineName = Directory.GetFiles(".\\", "*_machineconfig.log")[0];
             machineName = machineName.Split('_')[0];
-            ConfigValues.MachineName = machineName.Replace(".\\","");
+            ConfigValues.MachineName = machineName.Replace(".\\", "");
+            Globals.log.WriteLog(ConfigValues.MachineName,"MachineName:GetMachineName","[Config]");
         }
     }
 }

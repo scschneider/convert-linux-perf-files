@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 
 namespace ConvertLinuxPerfFiles.Utility
@@ -23,19 +24,27 @@ namespace ConvertLinuxPerfFiles.Utility
             return dateToFormat.ToString("MM/dd/yyyy HH:mm:ss");
         }
 
-        // converts the time to 24 hours and since the out files do not increment 
+        // converts the time to 24 hours and since some of the out files do not increment 
         // the day when metrics roll over into a new day, we need to provide the logic to do so.
-        public string DateTime24HourFormat(DateTime dateToFormat, int lastTimeStampHour)
+        public MetricTimeStamp FormatMetricTimeStamp(DateTime timeStamp, int lastMetricHour)
         {
-            int currentTimeStampHour = Convert.ToInt16(dateToFormat.ToString("HH"));
-            
-            if (currentTimeStampHour >= lastTimeStampHour || lastTimeStampHour == -1)
+            MetricTimeStamp metric = new MetricTimeStamp();
+
+            int currentMetricHour = Convert.ToInt16(timeStamp.ToString("HH"));
+            metric.LastTimeStampHour = currentMetricHour;
+
+            if (currentMetricHour >= lastMetricHour)
             {
-                return dateToFormat.ToString("MM/dd/yyyy HH:mm:ss");
+                metric.FormattedTimeStamp = timeStamp.ToString("MM/dd/yyyy HH:mm:ss");
+                metric.IncrementDay = false;
             }
-            else {
-                return dateToFormat.AddDays(1).ToString("MM/dd/yyyy HH:mm:ss");
+            else
+            {
+                metric.FormattedTimeStamp = timeStamp.AddDays(1).ToString("MM/dd/yyyy HH:mm:ss");
+                metric.IncrementDay = true;
             }
+
+            return metric;
         }
     }
 
@@ -93,6 +102,7 @@ namespace ConvertLinuxPerfFiles.Utility
         public static string GetFullFilePath(string file)
         {
             string currentDirectory = Directory.GetCurrentDirectory();
+
             try
             {
                 string filePath = Directory.GetFiles(currentDirectory, file)[0];
@@ -122,6 +132,20 @@ namespace ConvertLinuxPerfFiles.Utility
             }
         }
     }
+
+    class ProcessUtility
+    {
+        public Process StartProcess(string processCommand, string processArgs)
+        {
+            ProcessStartInfo processStartInfo = new ProcessStartInfo(processCommand, processArgs);
+            Process process = new Process();
+            process.StartInfo = processStartInfo;
+            process.Start();
+
+            return process;
+        }
+
+    }
     // used to convert common true,yes,1/false,no,0 values to bool
     class TypeConversionUtility
     {
@@ -147,5 +171,16 @@ namespace ConvertLinuxPerfFiles.Utility
 
             return pv;
         }
+    }
+
+    class MetricTimeStamp
+    {
+        public MetricTimeStamp()
+        {
+            IncrementDay = false;
+        }
+        public bool IncrementDay { get; set; }
+        public string FormattedTimeStamp { get; set; }
+        public int LastTimeStampHour { get; set; }
     }
 }

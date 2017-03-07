@@ -22,14 +22,14 @@ namespace ConvertLinuxPerfFiles.Model
         // class properties
         private string[] PidFilter { get; set; }
         private List<long> BlockCount = new List<long>();
-        private List<Process> Processes = new List<Process>();
+        private List<PidProcess> Processes = new List<PidProcess>();
         private Dictionary<long, string> UniquePids;
 
         // class methods
         // Reads each line where there are metrics, creates a process object and adds it to the objects collection
-        public List<Process> GetProcessMetrics()
+        public List<PidProcess> GetProcessMetrics()
         {
-            List<Process> processes = new List<Process>();
+            List<PidProcess> processes = new List<PidProcess>();
 
             DateTimeUtility utility = new DateTimeUtility();
 
@@ -39,8 +39,9 @@ namespace ConvertLinuxPerfFiles.Model
             Regex rgxEmptyLine = new Regex(emptyLinePattern);
             Regex rgxSplitLine = new Regex(splitPattern);
 
-            Progress progress = new Progress();
-            progress.WriteTitle("Reading PID file, filtering results and adding to collection.");
+            int progressLine = 25;
+            // Progress progress = new Progress();
+            // progress.WriteTitle("Reading PID file, filtering results and adding to collection.",progressLine);
 
             // starting at the first line where # appears
             for (int i = 3; i <= FileContents.Count - 1;)
@@ -74,7 +75,7 @@ namespace ConvertLinuxPerfFiles.Model
                     Array.Copy(thisProcessLine, 4, theseMetrics, 0, 15);
 
                     // create a new process object and set its properties from the vairables we declared above
-                    Process process = new Process()
+                    PidProcess process = new PidProcess()
                     {
                         TimeStamp = thisTimeStamp,
                         Pid = thisPid,
@@ -85,14 +86,14 @@ namespace ConvertLinuxPerfFiles.Model
                     // we need to filter out what gets collected based on the PidFilter in the config file.
                     if (ConfigValues.PidStatFilter.Count() != -1 && ConfigValues.PidStatFilter.Contains(process.ProcessName))
                     {
-                        progress.WriteProgress(i,FileContents.Count);
+                        // progress.WriteProgress(i, FileContents.Count,progressLine);
                         // once we are done generating the process object, we add the object to the collection of processes
                         processes.Add(process);
                     }
                     // if there are no filters, we need to add everything
                     if (ConfigValues.PidStatFilter[0] == "" || ConfigValues.PidStatFilter[0] == "false")
                     {
-                        progress.WriteProgress(i,FileContents.Count);
+                        // progress.WriteProgress(i, FileContents.Count,progressLine);
                         // once we are done generating the process object, we add the object to the collection of processes
                         processes.Add(process);
                     }
@@ -109,9 +110,10 @@ namespace ConvertLinuxPerfFiles.Model
         // from previous blocks, we need to get this information up front before processing the results
         private Dictionary<long, string> GetUniquePids()
         {
-            Progress progress = new Progress();
-            
-            progress.WriteTitle("Filtering out unique PIDs");
+            // int progressLine = 25;
+            // Progress progress = new Progress();
+
+            // progress.WriteTitle("Filtering out unique PIDs",progressLine);
 
             Dictionary<long, string> unique = new Dictionary<long, string>();
             unique = Processes.Select(x => new { x.Pid, x.ProcessName }).Distinct().OrderBy(Pid => Pid.Pid).ToDictionary(x => x.Pid, x => x.ProcessName);
@@ -125,6 +127,7 @@ namespace ConvertLinuxPerfFiles.Model
             OutHeader outHeader = new OutHeader()
             {
                 StartingColumn = 4,
+                TrimColumn = 1,
                 StartingRow = 3,
                 FileContents = FileContents,
                 Devices = UniquePids.Select(x => x.Value + "#" + x.Key).ToList(),
@@ -137,17 +140,18 @@ namespace ConvertLinuxPerfFiles.Model
         // generating the useful data for the metrics section of the TSV file
         private List<string> GetPidStatMetrics()
         {
-            Progress progress = new Progress();
-            progress.WriteTitle("Parsing PID metrics");
+            // int progressLine = 25;
+            // Progress progress = new Progress();
+            // progress.WriteTitle("Parsing PID metrics",progressLine);
 
             int c = 0;
             // create the collection that each generated line will be placed in
             List<string> metrics = new List<string>();
             // loop through every process in processes
-            foreach (Process process in Processes)
+            foreach (PidProcess process in Processes)
             {
                 c++;
-                progress.WriteProgress(c,Processes.Count);
+                // progress.WriteProgress(c, Processes.Count,progressLine);
                 // create the object that each metric will get appended to
                 StringBuilder metric = new StringBuilder();
                 // each metric line starts with a timestamp
@@ -183,7 +187,7 @@ namespace ConvertLinuxPerfFiles.Model
     }
 
     // Process class used when creating a new process. These get added to the Processes collection.
-    class Process
+    class PidProcess
     {
         public long Pid { get; set; }
         public string ProcessName { get; set; }

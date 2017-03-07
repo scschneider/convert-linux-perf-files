@@ -16,7 +16,7 @@ namespace ConvertLinuxPerfFiles.Logging
         {
             StreamWriter log;
             StringBuilder message = new StringBuilder();
-
+            
             if (File.Exists(LoggingConfig.LogFileName))
             {
                 FileStream fileStream = new FileStream(LoggingConfig.LogFileName, FileMode.Append, FileAccess.Write);

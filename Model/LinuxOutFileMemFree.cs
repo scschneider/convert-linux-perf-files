@@ -29,6 +29,7 @@ namespace ConvertLinuxPerfFiles.Model
         // the get memory metrics method is in with the common methods sine we have to call this more than once.
         private List<string> GetMemFreeMetrics()
         {
+            // int progressLine = 5;
             return new LinuxOutFileHelper().GetMemoryMetrics(FileContents);
         }
 

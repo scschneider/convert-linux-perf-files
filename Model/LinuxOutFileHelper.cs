@@ -60,7 +60,7 @@ namespace ConvertLinuxPerfFiles.Model
             {
                 foreach (string device in outHeader.Devices)
                 {
-                    for (int i = outHeader.StartingColumn; i < outHeaderSplit.Length; i++)
+                    for (int i = outHeader.StartingColumn; i < outHeaderSplit.Length - outHeader.TrimColumn; i++)
                     {
                         header.Append('"' + "\\\\" + ConfigValues.MachineName + "\\" + outHeader.ObjectName + "(" + device + ")\\" + outHeaderSplit[i] + '"' + "\t");
                     }
@@ -70,7 +70,7 @@ namespace ConvertLinuxPerfFiles.Model
             // some out files do not have devices, like mem free or mem swap. we look for devices count and if there are none, create header w/o devices
             if (outHeader.Devices == null)
             {
-                for (int i = outHeader.StartingColumn; i < outHeaderSplit.Length; i++)
+                for (int i = outHeader.StartingColumn; i < outHeaderSplit.Length - outHeader.TrimColumn; i++)
                 {
                     header.Append('"' + "\\\\" + ConfigValues.MachineName + "\\" + outHeader.ObjectName + "\\" + outHeaderSplit[i] + '"' + "\t");
                 }
@@ -82,33 +82,35 @@ namespace ConvertLinuxPerfFiles.Model
         // since we need to get the metrics of swap and free memory, I am creating the get metric method in the common class.
         public List<string> GetMemoryMetrics(List<string> fileContents)
         {
-            Progress progress = new Progress();
-            progress.WriteTitle("Parsing Memory metrics");
-            
+            // Progress progress = new Progress();
+            // progress.WriteTitle("Parsing Memory metrics",progressLine);
+
             List<string> metrics = new List<string>();
-            
+
             string splitPattern = "\\s+";
-            string datePattern = "(\\d{2})/(\\d{2})/(\\d{4})";
-            
+            string datePattern = "(\\d{2})\\/(\\d{2})\\/(\\d{4})";
+
             Regex rgxSplitLine = new Regex(splitPattern);
-            
+
             int lastTimeStampHour = -1;
             Regex rgxDate = new Regex(datePattern);
-            Match metricDate = rgxDate.Match(fileContents[0]);
+            string metricDateMatch = rgxDate.Match(fileContents[0]).ToString();
 
             for (int i = 3; i < fileContents.Count; i++)
             {
-                progress.WriteProgress(i,fileContents.Count);
-                
+                // progress.WriteProgress(i, fileContents.Count,progressLine);
+
                 StringBuilder thisMetricSample = new StringBuilder();
                 string[] thisLineContents = rgxSplitLine.Split(fileContents[i]);
 
-                // grabbing timestamp information for this current metric. we also provide the logic to roll over to the next day since the linux metric collection does not do this for us.
-                string timeStampFormatted;
-                DateTime timeStamp = DateTime.Parse(metricDate.ToString() + " " + thisLineContents[0] + thisLineContents[1]);
-                timeStampFormatted = new DateTimeUtility().DateTime24HourFormat(timeStamp, lastTimeStampHour);
-                lastTimeStampHour = Convert.ToInt16(timeStamp.ToString("HH"));
-                thisMetricSample.Append('"' + timeStampFormatted + '"' + "\t");
+                DateTime timeStamp = DateTime.Parse(metricDateMatch + " " + thisLineContents[0] + " " + thisLineContents[1]);
+
+                MetricTimeStamp metricTimeStamp = new DateTimeUtility().FormatMetricTimeStamp(timeStamp, lastTimeStampHour);
+
+                if (metricTimeStamp.IncrementDay) { metricDateMatch = DateTime.Parse(metricTimeStamp.FormattedTimeStamp).ToString("MM/dd/yyyy"); }
+                lastTimeStampHour = metricTimeStamp.LastTimeStampHour;
+
+                thisMetricSample.Append('"' + metricTimeStamp.FormattedTimeStamp + '"' + "\t");
 
                 for (int j = 2; j < thisLineContents.Length; j++)
                 {
@@ -122,14 +124,14 @@ namespace ConvertLinuxPerfFiles.Model
         // this is the common get metric shared between network and mpstat. since both files are similar formats, we place the get metrics in the common helper class
         public List<string> GetMetrics(List<string> devices, List<string> fileContents)
         {
-            Progress progress = new Progress();
-            progress.WriteTitle("Parsing MPStat/Network metrics");
+            // Progress progress = new Progress();
+            // progress.WriteTitle("Parsing MPStat/Network metrics", progressLine);
 
             List<string> metrics = new List<string>();
 
             string emptyLinePattern = "^\\s*$";
             string splitPattern = "\\s+";
-            string datePattern = "(\\d{2})/(\\d{2})/(\\d{4})";
+            string datePattern = "(\\d{2})\\/(\\d{2})\\/(\\d{4})";
 
             Regex rgxEmptyLine = new Regex(emptyLinePattern);
             Regex rgxSplitLine = new Regex(splitPattern);
@@ -138,14 +140,13 @@ namespace ConvertLinuxPerfFiles.Model
             int deviceCount = devices.Count;
 
             int lastTimeStampHour = -1;
-            Match metricDate = rgxDate.Match(fileContents[0]);
+            string metricDateMatch = rgxDate.Match(fileContents[0]).ToString();
 
             // looping through each line in the contents of this out file
             for (int i = 1; i < fileContents.Count;)
             {
-                progress.WriteProgress(i,fileContents.Count);
+                // progress.WriteProgress(i, fileContents.Count, progressLine);
 
-                DateTime timeStamp;
                 StringBuilder thisMetricSample = new StringBuilder();
 
                 // this file is in a block format and we use empty lines to determin when to start parsing the next metric
@@ -155,12 +156,16 @@ namespace ConvertLinuxPerfFiles.Model
                     i = i + 2;
 
                     // grabbing timestamp information for this current metric. we also provide the logic to roll over to the next day since the linux metric collection does not do this for us.
-                    string timeStampFormatted;
                     string[] thisLineContents = rgxSplitLine.Split(fileContents[i]);
-                    timeStamp = DateTime.Parse(metricDate.ToString() + " " + thisLineContents[0] + thisLineContents[1]);
-                    timeStampFormatted = new DateTimeUtility().DateTime24HourFormat(timeStamp, lastTimeStampHour);
-                    lastTimeStampHour = Convert.ToInt16(timeStamp.ToString("HH"));
-                    thisMetricSample.Append('"' + timeStampFormatted + '"' + "\t");
+
+                    DateTime timeStamp = DateTime.Parse(metricDateMatch + " " + thisLineContents[0] + " " + thisLineContents[1]);
+
+                    MetricTimeStamp metricTimeStamp = new DateTimeUtility().FormatMetricTimeStamp(timeStamp, lastTimeStampHour);
+
+                    if (metricTimeStamp.IncrementDay) { metricDateMatch = DateTime.Parse(metricTimeStamp.FormattedTimeStamp).ToString("MM/dd/yyyy"); }
+                    lastTimeStampHour = metricTimeStamp.LastTimeStampHour;
+
+                    thisMetricSample.Append('"' + metricTimeStamp.FormattedTimeStamp + '"' + "\t");
                 }
 
                 // this is where the metric data gets parsed and added to the collection
@@ -187,12 +192,18 @@ namespace ConvertLinuxPerfFiles.Model
     // this is the object that we pass in to the GetHeader method in this helper class. this object contains instructions on where to start parsing data, data to parse and devices to include in the header.
     class OutHeader
     {
+        public OutHeader()
+        {
+            // setting the TrimColumn to a default of 0. In the case where we need to 
+            // get columns from startcolumn to end, but need to ommit the last column. 
+            // Like in the pidstat case. We don't want to get the last column "command"
+            TrimColumn = 0;
+        }
         public int StartingColumn { get; set; }
-        public int EndColumn { get; set; }
+        public int TrimColumn { get; set; }
         public int StartingRow { get; set; }
         public List<string> FileContents { get; set; }
         public List<string> Devices { get; set; }
         public string ObjectName { get; set; }
     }
-
 }
