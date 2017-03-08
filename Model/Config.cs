@@ -1,11 +1,15 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text.RegularExpressions;
-using ConvertLinuxPerfFiles.Utility;
-
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 namespace ConvertLinuxPerfFiles
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Text.RegularExpressions;
+    using ConvertLinuxPerfFiles.Utility;
+
     // since this configuration file gives instructions throughout the program, it is created as a global class
     public static class ConfigValues
     {

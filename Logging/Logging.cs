@@ -1,9 +1,13 @@
-using System;
-using System.IO;
-using System.Text;
-
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 namespace ConvertLinuxPerfFiles.Logging
 {
+    using System;
+    using System.IO;
+    using System.Text;
+
     // simple logging class to capture errors that may happen and write to a file
     public static class LoggingConfig
     {

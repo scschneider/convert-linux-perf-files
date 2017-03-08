@@ -1,14 +1,16 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading;
-using ConvertLinuxPerfFiles.Logging;
-using ConvertLinuxPerfFiles.Model;
-using ConvertLinuxPerfFiles.Utility;
-
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 namespace ConvertLinuxPerfFiles
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Threading;
+    using ConvertLinuxPerfFiles.Logging;
+    using ConvertLinuxPerfFiles.Model;
+    using ConvertLinuxPerfFiles.Utility;
     public static class Globals
     {
         public static Log log = new Log();
@@ -43,54 +45,63 @@ namespace ConvertLinuxPerfFiles
             if (ConfigValues.ImportIoStat)
             {
                 Thread thread = new Thread(new ThreadStart(ImportIo));
+                thread.Name = "Import IO Stat";
                 thread.Start();
-                while (!thread.IsAlive) ;
+                Console.WriteLine("Started " + DateTime.Now + ": " + thread.Name);
+                
                 threads.Add(thread);
             }
 
             if (ConfigValues.ImportMemFree)
             {
                 Thread thread = new Thread(new ThreadStart(ImportMemFree));
+                thread.Name = "Import Memory Free";
                 thread.Start();
-                while (!thread.IsAlive) ;
+                Console.WriteLine("Started " + DateTime.Now + ": " + thread.Name);
+                
                 threads.Add(thread);
             }
             if (ConfigValues.ImportMemSwap)
             {
                 Thread thread = new Thread(new ThreadStart(ImportMemSwap));
+                thread.Name = "Import Memory Swap";
                 thread.Start();
-                while (!thread.IsAlive) ;
+                Console.WriteLine("Started " + DateTime.Now + ": " + thread.Name);
+                
                 threads.Add(thread);
             }
             if (ConfigValues.ImportMpStat)
             {
                 Thread thread = new Thread(new ThreadStart(ImportMp));
+                thread.Name = "Import MP Stat CPU";
                 thread.Start();
-                while (!thread.IsAlive) ;
+                Console.WriteLine("Started " + DateTime.Now + ": " + thread.Name);
+                
                 threads.Add(thread);
             }
             if (ConfigValues.ImportNetStats)
             {
                 Thread thread = new Thread(new ThreadStart(ImportNet));
+                thread.Name = "Import Network";
                 thread.Start();
-                while (!thread.IsAlive) ;
+                Console.WriteLine("Started " + DateTime.Now + ": " + thread.Name);
+                
                 threads.Add(thread);
             }
             if (ConfigValues.ImportPidStat)
             {
                 Thread thread = new Thread(new ThreadStart(ImportPid));
+                thread.Name = "Import PID Stat";
                 thread.Start();
-                while (!thread.IsAlive) ;
+                Console.WriteLine("Started " + DateTime.Now + ": " + thread.Name);
+                
                 threads.Add(thread);
             }
             
             foreach (Thread thread in threads)
             {
-               while (thread.IsAlive)
-               {
-                   Console.WriteLine("Converting files...");
-                    System.Threading.Thread.Sleep(3000);
-               }
+                thread.Join();
+                Console.WriteLine("Completed " + DateTime.Now + ": " + thread.Name);
             }
 
             if (ConfigValues.ImportCombine) { ImportCombine(); }

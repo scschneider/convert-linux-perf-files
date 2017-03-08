@@ -1,11 +1,15 @@
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using ConvertLinuxPerfFiles.Utility;
-
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 namespace ConvertLinuxPerfFiles.Model
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Diagnostics;
+    using System.IO;
+    using ConvertLinuxPerfFiles.Utility;
+    
     class ImportCombine
     {
         // private void CleanUp()

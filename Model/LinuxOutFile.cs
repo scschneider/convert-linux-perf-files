@@ -1,7 +1,11 @@
-using System.Collections.Generic;
-
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 namespace ConvertLinuxPerfFiles.Model
 {
+    using System.Collections.Generic;
+    
     // parent class for the Linux out file child classes. The common properties and constructor used by the child classes
     class LinuxOutFile
     {
