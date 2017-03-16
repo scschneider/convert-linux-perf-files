@@ -3,6 +3,7 @@ pssdiag.conf
 *.tsv
 /bin
 /obj
+/backup
 /.vscode
 ImportLog.log
 *_machineconfig.log
