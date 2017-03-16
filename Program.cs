@@ -39,7 +39,7 @@ namespace ConvertLinuxPerfFiles
             Console.WriteLine(DateTime.Now.ToString());
 
             // progress.WriteTitle("Converting files located in: " + Directory.GetCurrentDirectory());
-            LoggingConfig.LogFileName = "ImportLog.log";
+            LoggingConfig.LogFileName = "Import.log";
             Config config = new Config();
 
             List<Thread> threads = new List<Thread>();

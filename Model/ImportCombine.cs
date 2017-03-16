@@ -90,18 +90,17 @@ namespace ConvertLinuxPerfFiles.Model
         {
             try
             {
-                string processCommand = "relog.exe";
-                string processArgs = " .\\Individual\\*.blg -o .\\" + ConfigValues.MachineName + "_AllPerfmonMetrics.blg -y";
-
-                Process process = new ProcessUtility().StartProcess(processCommand, processArgs);
-                process.WaitForExit();
-                process.Dispose();
-
-                Globals.log.WriteLog("relog.exe" + " .\\Individual\\*.blg -o .\\" + ConfigValues.MachineName + "_AllPerfmonMetrics.blg", "ImportCombine:RelogCombineToBlg", "[Info]");
+                string processCommand = "relog.exe ";
+                string processArgs = ".\\*.blg -o .\\Single_BLG\\" + ConfigValues.MachineName + "_AllPerfmonMetrics.blg -y";
+                Globals.log.WriteLog(processCommand + processArgs, "ImportCombine:RelogCombineToBlg", "[Info]");
+                
+                Process p = new Utility.ProcessUtility().StartProcess(processCommand, processArgs);
+                p.WaitForExit();
+                p.Dispose();
             }
             catch (Exception e)
             {
-                Globals.log.WriteLog(e.Message, "ImportCombine:RelogConvertToBlg", "[Error]");
+                Globals.log.WriteLog(e.Message, "ImportCombine:RelogCombineToBlg", "[Error]");
             }
         }
     }
