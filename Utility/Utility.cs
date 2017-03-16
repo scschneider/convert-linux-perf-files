@@ -2,13 +2,14 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
+
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+
 namespace ConvertLinuxPerfFiles.Utility
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.IO;
-    
     // utility class that contains common methods used by multiple classes and/or methods
     // contains some basic logging
     class DateTimeUtility

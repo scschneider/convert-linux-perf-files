@@ -2,14 +2,15 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
+
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text.RegularExpressions;
+using ConvertLinuxPerfFiles.Utility;
+
 namespace ConvertLinuxPerfFiles
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Text.RegularExpressions;
-    using ConvertLinuxPerfFiles.Utility;
-
     // since this configuration file gives instructions throughout the program, it is created as a global class
     public static class ConfigValues
     {
@@ -75,31 +76,31 @@ namespace ConvertLinuxPerfFiles
                         case "machine_name":
                             parameterValueString = splitValue[1];
                             ConfigValues.MachineName = parameterValueString;
-                            Globals.log.WriteLog(parameterValueString,"machine_name","[Config]");
+                            Globals.log.WriteLog(parameterValueString, "machine_name", "[Config]");
                             break;
                         case "import_iostat":
                             ConfigValues.ImportIoStat = parameterValueBool;
-                            Globals.log.WriteLog(parameterValueBool.ToString(),"import_iostat","[Config]");
+                            Globals.log.WriteLog(parameterValueBool.ToString(), "import_iostat", "[Config]");
                             break;
                         case "import_mpstat":
                             ConfigValues.ImportMpStat = parameterValueBool;
-                            Globals.log.WriteLog(parameterValueBool.ToString(),"import_mpstat","[Config]");
+                            Globals.log.WriteLog(parameterValueBool.ToString(), "import_mpstat", "[Config]");
                             break;
                         case "import_memfree":
                             ConfigValues.ImportMemFree = parameterValueBool;
-                            Globals.log.WriteLog(parameterValueBool.ToString(),"import_memfree","[Config]");
+                            Globals.log.WriteLog(parameterValueBool.ToString(), "import_memfree", "[Config]");
                             break;
                         case "import_memswap":
                             ConfigValues.ImportMemSwap = parameterValueBool;
-                            Globals.log.WriteLog(parameterValueBool.ToString(),"import_memswap","[Config]");
+                            Globals.log.WriteLog(parameterValueBool.ToString(), "import_memswap", "[Config]");
                             break;
                         case "import_network_stats":
                             ConfigValues.ImportNetStats = parameterValueBool;
-                            Globals.log.WriteLog(parameterValueBool.ToString(),"import_network_stats","[Config]");
+                            Globals.log.WriteLog(parameterValueBool.ToString(), "import_network_stats", "[Config]");
                             break;
                         case "import_pidstat":
                             ConfigValues.ImportPidStat = parameterValueBool;
-                            Globals.log.WriteLog(parameterValueBool.ToString(),"import_pidstat","[Config]");
+                            Globals.log.WriteLog(parameterValueBool.ToString(), "import_pidstat", "[Config]");
                             break;
                         case "import_pidstat_filter":
                             // since pidstat_filter accepts comma separated, dynamic values, we need to remove spaces, capture this and turn it into an array.
@@ -110,11 +111,11 @@ namespace ConvertLinuxPerfFiles
                             string[] pidStatFilerSplitValue = parameterValueString.Split(pidStatFilterDelimeter);
 
                             ConfigValues.PidStatFilter = pidStatFilerSplitValue;
-                            Globals.log.WriteLog(parameterValueString,"import_pidstat_filter","[Config]");
+                            Globals.log.WriteLog(parameterValueString, "import_pidstat_filter", "[Config]");
                             break;
                         case "import_combine_perfmon_files":
                             ConfigValues.ImportCombine = parameterValueBool;
-                            Globals.log.WriteLog(parameterValueBool.ToString(),"import_combine_perfmon_files","[Config]");
+                            Globals.log.WriteLog(parameterValueBool.ToString(), "import_combine_perfmon_files", "[Config]");
                             break;
                         default:
                             break;
@@ -141,7 +142,7 @@ namespace ConvertLinuxPerfFiles
             string machineName = Directory.GetFiles(".\\", "*_machineconfig.log")[0];
             machineName = machineName.Split('_')[0];
             ConfigValues.MachineName = machineName.Replace(".\\", "");
-            Globals.log.WriteLog(ConfigValues.MachineName,"MachineName:GetMachineName","[Config]");
+            Globals.log.WriteLog(ConfigValues.MachineName, "MachineName:GetMachineName", "[Config]");
         }
     }
 }

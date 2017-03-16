@@ -2,15 +2,17 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
+
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Threading;
+using ConvertLinuxPerfFiles.Logging;
+using ConvertLinuxPerfFiles.Model;
+using ConvertLinuxPerfFiles.Utility;
+
 namespace ConvertLinuxPerfFiles
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Threading;
-    using ConvertLinuxPerfFiles.Logging;
-    using ConvertLinuxPerfFiles.Model;
-    using ConvertLinuxPerfFiles.Utility;
     public static class Globals
     {
         public static Log log = new Log();
@@ -48,7 +50,7 @@ namespace ConvertLinuxPerfFiles
                 thread.Name = "Import IO Stat";
                 thread.Start();
                 Console.WriteLine("Started " + DateTime.Now + ": " + thread.Name);
-                
+
                 threads.Add(thread);
             }
 
@@ -58,7 +60,7 @@ namespace ConvertLinuxPerfFiles
                 thread.Name = "Import Memory Free";
                 thread.Start();
                 Console.WriteLine("Started " + DateTime.Now + ": " + thread.Name);
-                
+
                 threads.Add(thread);
             }
             if (ConfigValues.ImportMemSwap)
@@ -67,7 +69,7 @@ namespace ConvertLinuxPerfFiles
                 thread.Name = "Import Memory Swap";
                 thread.Start();
                 Console.WriteLine("Started " + DateTime.Now + ": " + thread.Name);
-                
+
                 threads.Add(thread);
             }
             if (ConfigValues.ImportMpStat)
@@ -76,7 +78,7 @@ namespace ConvertLinuxPerfFiles
                 thread.Name = "Import MP Stat CPU";
                 thread.Start();
                 Console.WriteLine("Started " + DateTime.Now + ": " + thread.Name);
-                
+
                 threads.Add(thread);
             }
             if (ConfigValues.ImportNetStats)
@@ -85,7 +87,7 @@ namespace ConvertLinuxPerfFiles
                 thread.Name = "Import Network";
                 thread.Start();
                 Console.WriteLine("Started " + DateTime.Now + ": " + thread.Name);
-                
+
                 threads.Add(thread);
             }
             if (ConfigValues.ImportPidStat)
@@ -94,10 +96,10 @@ namespace ConvertLinuxPerfFiles
                 thread.Name = "Import PID Stat";
                 thread.Start();
                 Console.WriteLine("Started " + DateTime.Now + ": " + thread.Name);
-                
+
                 threads.Add(thread);
             }
-            
+
             foreach (Thread thread in threads)
             {
                 thread.Join();
