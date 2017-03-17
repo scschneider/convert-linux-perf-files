@@ -42,7 +42,7 @@ namespace ConvertLinuxPerfFiles
         // class functions
         private List<string> GetFileContents()
         {
-            return new FileUtility().ReadFileByLine("pssdiag.conf");
+            return new FileUtility().ReadFileByLine("pssdiagimport.conf");
         }
         private void GetConfigVariables()
         {
@@ -132,14 +132,14 @@ namespace ConvertLinuxPerfFiles
         private void GetTimeZone()
         {
             FileUtility fileUtility = new FileUtility();
-            int tz = Convert.ToInt16(fileUtility.ReadFileByLine("*timezone.out")[0].Substring(0, 3));
+            int tz = Convert.ToInt16(fileUtility.ReadFileByLine("*timezone.info")[0].Substring(0, 3));
 
             ConfigValues.TimeZone = tz;
         }
 
         private void GetMachineName()
         {
-            string machineName = Directory.GetFiles(".\\", "*_machineconfig.log")[0];
+            string machineName = Directory.GetFiles(".\\", "*_machineconfig.info")[0];
             machineName = machineName.Split('_')[0];
             ConfigValues.MachineName = machineName.Replace(".\\", "");
             Globals.log.WriteLog(ConfigValues.MachineName, "MachineName:GetMachineName", "[Config]");

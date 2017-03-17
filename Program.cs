@@ -28,7 +28,7 @@ namespace ConvertLinuxPerfFiles
             }
             catch (System.Exception e)
             {
-                string message = "Expects 1 argument: Please specify the directory where the .out files are.";
+                string message = "Expects 1 argument: Please specify the directory where the .perf files are.";
 
                 System.Console.WriteLine(message);
                 System.Console.WriteLine(e.Message);
@@ -39,7 +39,7 @@ namespace ConvertLinuxPerfFiles
             Console.WriteLine(DateTime.Now.ToString());
 
             // progress.WriteTitle("Converting files located in: " + Directory.GetCurrentDirectory());
-            LoggingConfig.LogFileName = "Import.log";
+            LoggingConfig.LogFileName = "pssdiaglinuximport.log";
             Config config = new Config();
 
             List<Thread> threads = new List<Thread>();
@@ -112,41 +112,41 @@ namespace ConvertLinuxPerfFiles
 
         private static void ImportIo()
         {
-            string ioStatFileName = "*_iostat.out";
+            string ioStatFileName = "*_iostat.perf";
             LinuxOutFileIoStat ioStat = new LinuxOutFileIoStat(ioStatFileName);
             new FileUtility().WriteTsvFileByLine(ioStatFileName, ioStat.Header, ioStat.Metrics);
         }
 
         private static void ImportMemFree()
         {
-            string memFreeFileName = "*_memory_free.out";
+            string memFreeFileName = "*_memory_free.perf";
             LinuxOutFileMemFree memFree = new LinuxOutFileMemFree(memFreeFileName);
             new FileUtility().WriteTsvFileByLine(memFreeFileName, memFree.Header, memFree.Metrics);
         }
         private static void ImportMemSwap()
         {
-            string memSwapFileName = "*_memory_swap.out";
+            string memSwapFileName = "*_memory_swap.perf";
             LinuxOutFileMemSwap memSwap = new LinuxOutFileMemSwap(memSwapFileName);
             new FileUtility().WriteTsvFileByLine(memSwapFileName, memSwap.Header, memSwap.Metrics);
         }
 
         private static void ImportMp()
         {
-            string mpStatFileName = "*_mpstats_cpu.out";
+            string mpStatFileName = "*_mpstats_cpu.perf";
             LinuxOutFileMpStat mpStat = new LinuxOutFileMpStat(mpStatFileName);
             new FileUtility().WriteTsvFileByLine(mpStatFileName, mpStat.Header, mpStat.Metrics);
         }
 
         private static void ImportNet()
         {
-            string networkFileName = "*_network_stats.out";
+            string networkFileName = "*_network_stats.perf";
             LinuxOutFileNetwork network = new LinuxOutFileNetwork(networkFileName);
             new FileUtility().WriteTsvFileByLine(networkFileName, network.Header, network.Metrics);
         }
 
         private static void ImportPid()
         {
-            string pidStatFileName = "*_process_pidstat.out";
+            string pidStatFileName = "*_process_pidstat.perf";
             LinuxOutFilePidStat pidStat = new LinuxOutFilePidStat(pidStatFileName);
             new FileUtility().WriteTsvFileByLine(pidStatFileName, pidStat.Header, pidStat.Metrics);
         }

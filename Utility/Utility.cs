@@ -119,13 +119,13 @@ namespace ConvertLinuxPerfFiles.Utility
                 throw;
             }
         }
-        // this changes the file name from the original .out filename to .tsv. the result of this is used to name the tsv file
+        // this changes the file name from the original .perf filename to .tsv. the result of this is used to name the tsv file
         public static string SetTsvFileName(string file)
         {
             try
             {
                 string currentFileName = GetFullFilePath(file);
-                string tsvFileName = currentFileName.Replace(".out", ".tsv");
+                string tsvFileName = currentFileName.Replace(".perf", ".tsv");
 
                 return tsvFileName;
             }
