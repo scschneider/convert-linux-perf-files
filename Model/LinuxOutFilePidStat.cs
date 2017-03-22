@@ -34,6 +34,11 @@ namespace ConvertLinuxPerfFiles.Model
         // Reads each line where there are metrics, creates a process object and adds it to the objects collection
         public List<PidProcess> GetProcessMetrics()
         {
+            // we need to keep track of the timestamp so we know when to create a new PID group.
+            string previousTimeStamp = "first";
+
+            PidProcessGroup pidProcessGroup = new PidProcessGroup();
+
             List<PidProcess> processes = new List<PidProcess>();
 
             DateTimeUtility utility = new DateTimeUtility();
@@ -49,7 +54,7 @@ namespace ConvertLinuxPerfFiles.Model
             // progress.WriteTitle("Reading PID file, filtering results and adding to collection.",progressLine);
 
             // starting at the first line where # appears
-            for (int i = 3; i <= FileContents.Count - 1;)
+            for (int i = 2; i <= FileContents.Count - 1;)
             {
                 if (FileContents[i].StartsWith("#"))
                 {
@@ -79,6 +84,10 @@ namespace ConvertLinuxPerfFiles.Model
                     // copies the metrics from the current line to theseMetrics array. We need to do this since we split the line to get other metrics.
                     Array.Copy(thisProcessLine, 4, theseMetrics, 0, 15);
 
+                    if (previousTimeStamp != "first" && previousTimeStamp != thisTimeStamp)
+                    {
+                        pidProcessGroup = new PidProcessGroup();
+                    }
                     // create a new process object and set its properties from the vairables we declared above
                     PidProcess process = new PidProcess()
                     {
@@ -87,6 +96,8 @@ namespace ConvertLinuxPerfFiles.Model
                         ProcessName = thisProcessName,
                         Metrics = theseMetrics
                     };
+
+                    
 
                     // we need to filter out what gets collected based on the PidFilter in the config file.
                     if (ConfigValues.PidStatFilter.Count() != -1 && ConfigValues.PidStatFilter.Contains(process.ProcessName))
@@ -133,7 +144,7 @@ namespace ConvertLinuxPerfFiles.Model
             {
                 StartingColumn = 4,
                 TrimColumn = 1,
-                StartingRow = 3,
+                StartingRow = 2,
                 FileContents = FileContents,
                 Devices = UniquePids.Select(x => x.Value + "#" + x.Key).ToList(),
                 ObjectName = "Process"
@@ -198,6 +209,13 @@ namespace ConvertLinuxPerfFiles.Model
         public string ProcessName { get; set; }
         public string TimeStamp { get; set; }
         public string[] Metrics { get; set; }
+    }
+
+    // creating a class to keep track of PID groups. each group consists of several PIDs aligned with that timestamp.
+    class PidProcessGroup
+    {
+        string TimeStamp { get; set; }
+        List<PidProcessGroup> GroupMetrics { get; set}
     }
 }
 
