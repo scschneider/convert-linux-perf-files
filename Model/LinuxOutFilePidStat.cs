@@ -27,19 +27,19 @@ namespace ConvertLinuxPerfFiles.Model
         // class properties
         private string[] PidFilter { get; set; }
         private List<long> BlockCount = new List<long>();
-        private List<PidProcess> Processes = new List<PidProcess>();
+        private List<PidProcessGroup> Processes = new List<PidProcessGroup>();
         private Dictionary<long, string> UniquePids;
 
         // class methods
         // Reads each line where there are metrics, creates a process object and adds it to the objects collection
-        public List<PidProcess> GetProcessMetrics()
+        public List<PidProcessGroup> GetProcessMetrics()
         {
-            // we need to keep track of the timestamp so we know when to create a new PID group.
-            string previousTimeStamp = "first";
+            // we need to keep track of blocks of metrics so that we know which metrics to group together.
+            bool blockIsFirst = true;
 
             PidProcessGroup pidProcessGroup = new PidProcessGroup();
 
-            List<PidProcess> processes = new List<PidProcess>();
+            List<PidProcessGroup> processes = new List<PidProcessGroup>();
 
             DateTimeUtility utility = new DateTimeUtility();
 
@@ -58,9 +58,34 @@ namespace ConvertLinuxPerfFiles.Model
             {
                 if (FileContents[i].StartsWith("#"))
                 {
+                    if (!blockIsFirst)
+                    {
+                        System.Console.WriteLine("first");
+                        processes.Add(pidProcessGroup);
+                        
+                    }
+
+                    if (blockIsFirst)
+                    {
+                        System.Console.WriteLine("not first");
+                        blockIsFirst = false;
+                        
+                    }
+
+                    // takes the value of the current line and splits on whitespace
+                    string[] thisProcessLine = rgxSplitLine.Split(FileContents[i + 1]);
+
+                    // reads the line timestamp, converts it from ephoc/unix time
+                    string thisTimeStamp = utility.FromUnixTime(Convert.ToInt32(thisProcessLine[1]), TimeZone);
+
                     // add the current line position to the block count array. We will use this to spin off multiple threads for processing the pid stat file
                     BlockCount.Add(i + 1);
                     i++;
+
+                    pidProcessGroup = new PidProcessGroup()
+                    {
+                        TimeStamp = thisTimeStamp
+                    };
                 }
                 // just skip empty lines and increment to the next line
                 else if (rgxEmptyLine.IsMatch(FileContents[i]))
@@ -71,7 +96,6 @@ namespace ConvertLinuxPerfFiles.Model
                 {
                     // takes the value of the current line and splits on whitespace
                     string[] thisProcessLine = rgxSplitLine.Split(FileContents[i]);
-
                     // reads the line timestamp, converts it from ephoc/unix time
                     string thisTimeStamp = utility.FromUnixTime(Convert.ToInt32(thisProcessLine[1]), TimeZone);
                     // reads this line's pid
@@ -84,10 +108,6 @@ namespace ConvertLinuxPerfFiles.Model
                     // copies the metrics from the current line to theseMetrics array. We need to do this since we split the line to get other metrics.
                     Array.Copy(thisProcessLine, 4, theseMetrics, 0, 15);
 
-                    if (previousTimeStamp != "first" && previousTimeStamp != thisTimeStamp)
-                    {
-                        pidProcessGroup = new PidProcessGroup();
-                    }
                     // create a new process object and set its properties from the vairables we declared above
                     PidProcess process = new PidProcess()
                     {
@@ -97,21 +117,27 @@ namespace ConvertLinuxPerfFiles.Model
                         Metrics = theseMetrics
                     };
 
-                    
-
                     // we need to filter out what gets collected based on the PidFilter in the config file.
                     if (ConfigValues.PidStatFilter.Count() != -1 && ConfigValues.PidStatFilter.Contains(process.ProcessName))
                     {
                         // progress.WriteProgress(i, FileContents.Count,progressLine);
                         // once we are done generating the process object, we add the object to the collection of processes
-                        processes.Add(process);
+                        System.Console.WriteLine("filtered: " + process.ProcessName + " | " + process.Pid);
+                        System.Console.WriteLine("group ts: " + pidProcessGroup.TimeStamp);
+                        pidProcessGroup.GroupMetrics.Add(process);
+                        
+                        //processes.Add(process);
+
                     }
                     // if there are no filters, we need to add everything
                     if (ConfigValues.PidStatFilter[0] == "" || ConfigValues.PidStatFilter[0] == "false")
                     {
                         // progress.WriteProgress(i, FileContents.Count,progressLine);
                         // once we are done generating the process object, we add the object to the collection of processes
-                        processes.Add(process);
+                        System.Console.WriteLine("not filtered: " + process.ProcessName + " | " + process.Pid);
+                        pidProcessGroup.GroupMetrics.Add(process);
+                        
+                        //processes.Add(process);
                     }
 
                     i++;
@@ -132,8 +158,11 @@ namespace ConvertLinuxPerfFiles.Model
             // progress.WriteTitle("Filtering out unique PIDs",progressLine);
 
             Dictionary<long, string> unique = new Dictionary<long, string>();
-            unique = Processes.Select(x => new { x.Pid, x.ProcessName }).Distinct().OrderBy(Pid => Pid.Pid).ToDictionary(x => x.Pid, x => x.ProcessName);
 
+            //unique = Processes.Select(x => new { x.Pid, x.ProcessName }).Distinct().OrderBy(Pid => Pid.Pid).ToDictionary(x => x.Pid, x => x.ProcessName);
+            unique = Processes.SelectMany(x => x.GroupMetrics).Select(y => new { y.Pid, y.ProcessName }).Distinct().OrderBy(pid => pid.Pid).ToDictionary(x => x.Pid, x => x.ProcessName);
+            //new { x.GroupMetrics => new {x.GroupMetrics[].Pid} x.GroupMetrics.Select(y => y.Pid), x.GroupMetrics.Select(y => y.ProcessName) }).Distinct().OrderBy(pid => pid.Pid).ToDictionary(x => x.Pid, x => x.ProcessName);
+            System.Console.WriteLine("unique: " + unique.Keys.Count);
             return unique;
         }
         // now that we have the unique pids, we can create the header
@@ -160,43 +189,79 @@ namespace ConvertLinuxPerfFiles.Model
             // Progress progress = new Progress();
             // progress.WriteTitle("Parsing PID metrics",progressLine);
 
-            int c = 0;
+            //int c = 0;
             // create the collection that each generated line will be placed in
             List<string> metrics = new List<string>();
             // loop through every process in processes
-            foreach (PidProcess process in Processes)
+
+            foreach (PidProcessGroup group in Processes)
             {
-                c++;
-                // progress.WriteProgress(c, Processes.Count,progressLine);
-                // create the object that each metric will get appended to
+                string timeStamp = group.TimeStamp;
+                
+                System.Console.WriteLine("group ts: " + group.TimeStamp + " | " + group.GroupMetrics.Count);
+                
                 StringBuilder metric = new StringBuilder();
-                // each metric line starts with a timestamp
-                metric.Append('"' + process.TimeStamp.ToString() + '"' + "\t");
+                metric.Append('"' + timeStamp + '"' + "\t");
 
-                // looping through each unique pid
-                foreach (var p in UniquePids)
+                foreach (PidProcess process in group.GroupMetrics)
                 {
-                    // if the unique pid matches the pid from the current process, this will write thatpid's data, collected from the out file
-                    if (process.Pid == p.Key)
+                    foreach (var pid in UniquePids)
                     {
-                        foreach (string m in process.Metrics)
+                        // if the unique pid matches the pid from the current process, this will write thatpid's data, collected from the out file
+                        if (process.Pid == pid.Key)
                         {
-                            metric.Append('"' + m + '"' + "\t");
+                            foreach (string m in process.Metrics)
+                            {
+                                metric.Append('"' + m + '"' + "\t");
+                            }
                         }
-                    }
 
-                    // if the unique pid does not match the pid from the current process, we write 0.00
-                    if (process.Pid != p.Key)
-                    {
-                        for (int i = 0; i <= process.Metrics.Count() - 1; i++)
+                        // if the unique pid does not match the pid from the current process, we write 0.00
+                        if (process.Pid != pid.Key)
                         {
-                            metric.Append('"' + "0.00" + '"' + "\t");
+                            for (int i = 0; i <= process.Metrics.Count() - 1; i++)
+                            {
+                                metric.Append('"' + "0.00" + '"' + "\t");
+                            }
                         }
                     }
                 }
-                // adding the data to the metrics object
                 metrics.Add(metric.ToString());
             }
+
+            // foreach (PidProcess process in Processes)
+            // {
+            //     c++;
+            //     // progress.WriteProgress(c, Processes.Count,progressLine);
+            //     // create the object that each metric will get appended to
+            //     StringBuilder metric = new StringBuilder();
+            //     // each metric line starts with a timestamp
+            //     metric.Append('"' + process.TimeStamp.ToString() + '"' + "\t");
+
+            //     // looping through each unique pid
+            //     foreach (var p in UniquePids)
+            //     {
+            //         // if the unique pid matches the pid from the current process, this will write thatpid's data, collected from the out file
+            //         if (process.Pid == p.Key)
+            //         {
+            //             foreach (string m in process.Metrics)
+            //             {
+            //                 metric.Append('"' + m + '"' + "\t");
+            //             }
+            //         }
+
+            //         // if the unique pid does not match the pid from the current process, we write 0.00
+            //         if (process.Pid != p.Key)
+            //         {
+            //             for (int i = 0; i <= process.Metrics.Count() - 1; i++)
+            //             {
+            //                 metric.Append('"' + "0.00" + '"' + "\t");
+            //             }
+            //         }
+            //     }
+            //     // adding the data to the metrics object
+            //     metrics.Add(metric.ToString());
+            // }
 
             return metrics;
         }
@@ -214,8 +279,13 @@ namespace ConvertLinuxPerfFiles.Model
     // creating a class to keep track of PID groups. each group consists of several PIDs aligned with that timestamp.
     class PidProcessGroup
     {
-        string TimeStamp { get; set; }
-        List<PidProcessGroup> GroupMetrics { get; set}
+        public PidProcessGroup()
+        {
+            GroupMetrics = new List<PidProcess>();
+        }
+
+        public string TimeStamp { get; set; }
+        public List<PidProcess> GroupMetrics { get; set; }
     }
 }
 

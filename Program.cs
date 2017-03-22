@@ -17,6 +17,7 @@ namespace ConvertLinuxPerfFiles
     {
         public static Log log = new Log();
     }
+    
     public class Program
     {
         public static void Main(string[] args)
