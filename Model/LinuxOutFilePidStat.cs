@@ -189,37 +189,42 @@ namespace ConvertLinuxPerfFiles.Model
             List<string> metrics = new List<string>();
 
             // loop through every process in processes
-            foreach (PidProcessGroup group in Processes)
+            foreach (PidProcessGroup timeStampGroup in Processes)
             {
-                string timeStamp = group.TimeStamp;
+                string timeStamp = timeStampGroup.TimeStamp;
 
-                System.Console.WriteLine("group ts: " + group.TimeStamp + " | " + group.GroupMetrics.Count);
+                System.Console.WriteLine("group ts: " + timeStampGroup.TimeStamp + " | " + timeStampGroup.GroupMetrics.Count);
 
                 StringBuilder metric = new StringBuilder();
                 metric.Append('"' + timeStamp + '"' + "\t");
 
-                foreach (PidProcess process in group.GroupMetrics)
+                foreach (var pid in UniquePids)
                 {
-                    foreach (var pid in UniquePids)
-                    {
+                    // foreach (PidProcess process in timeStampGroup.GroupMetrics)
+                    // {
+                        var exists = timeStampGroup.GroupMetrics.Where(x => x.Pid == pid.Key).Select(x => x.Pid).FirstOrDefault();
+                        System.Console.WriteLine(exists);
+                        var exists2 = UniquePids.ContainsKey(exists);
                         // if the unique pid matches the pid from the current process, this will write thatpid's data, collected from the out file
-                        if (pid.Key == process.Pid)
+                        if (exists2)
                         {
-                            foreach (string m in process.Metrics)
+                            var tm = timeStampGroup.GroupMetrics.Where(x => x.Pid == pid.Key).Select(x => x.Metrics).First();
+
+                            foreach (var m in tm)
                             {
                                 metric.Append('"' + m + '"' + "\t");
                             }
                         }
 
                         // if the unique pid does not match the pid from the current process, we write 0.00
-                        if (pid.Key != process.Pid)
+                        if (!exists2)
                         {
-                            for (int i = 0; i <= process.Metrics.Count() - 1; i++)
+                            for (int i = 0; i <= 15 - 1; i++)
                             {
                                 metric.Append('"' + "0.00" + '"' + "\t");
                             }
                         }
-                    }
+                    // }
                 }
                 metrics.Add(metric.ToString());
             }
