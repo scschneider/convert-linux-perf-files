@@ -62,14 +62,14 @@ namespace ConvertLinuxPerfFiles.Model
                     {
                         System.Console.WriteLine("first");
                         processes.Add(pidProcessGroup);
-                        
+
                     }
 
                     if (blockIsFirst)
                     {
                         System.Console.WriteLine("not first");
                         blockIsFirst = false;
-                        
+
                     }
 
                     // takes the value of the current line and splits on whitespace
@@ -125,7 +125,7 @@ namespace ConvertLinuxPerfFiles.Model
                         System.Console.WriteLine("filtered: " + process.ProcessName + " | " + process.Pid);
                         System.Console.WriteLine("group ts: " + pidProcessGroup.TimeStamp);
                         pidProcessGroup.GroupMetrics.Add(process);
-                        
+
                         //processes.Add(process);
 
                     }
@@ -136,7 +136,7 @@ namespace ConvertLinuxPerfFiles.Model
                         // once we are done generating the process object, we add the object to the collection of processes
                         System.Console.WriteLine("not filtered: " + process.ProcessName + " | " + process.Pid);
                         pidProcessGroup.GroupMetrics.Add(process);
-                        
+
                         //processes.Add(process);
                     }
 
@@ -185,21 +185,16 @@ namespace ConvertLinuxPerfFiles.Model
         // generating the useful data for the metrics section of the TSV file
         private List<string> GetPidStatMetrics()
         {
-            // int progressLine = 25;
-            // Progress progress = new Progress();
-            // progress.WriteTitle("Parsing PID metrics",progressLine);
-
-            //int c = 0;
             // create the collection that each generated line will be placed in
             List<string> metrics = new List<string>();
-            // loop through every process in processes
 
+            // loop through every process in processes
             foreach (PidProcessGroup group in Processes)
             {
                 string timeStamp = group.TimeStamp;
-                
+
                 System.Console.WriteLine("group ts: " + group.TimeStamp + " | " + group.GroupMetrics.Count);
-                
+
                 StringBuilder metric = new StringBuilder();
                 metric.Append('"' + timeStamp + '"' + "\t");
 
@@ -208,7 +203,7 @@ namespace ConvertLinuxPerfFiles.Model
                     foreach (var pid in UniquePids)
                     {
                         // if the unique pid matches the pid from the current process, this will write thatpid's data, collected from the out file
-                        if (process.Pid == pid.Key)
+                        if (pid.Key == process.Pid)
                         {
                             foreach (string m in process.Metrics)
                             {
@@ -217,7 +212,7 @@ namespace ConvertLinuxPerfFiles.Model
                         }
 
                         // if the unique pid does not match the pid from the current process, we write 0.00
-                        if (process.Pid != pid.Key)
+                        if (pid.Key != process.Pid)
                         {
                             for (int i = 0; i <= process.Metrics.Count() - 1; i++)
                             {
