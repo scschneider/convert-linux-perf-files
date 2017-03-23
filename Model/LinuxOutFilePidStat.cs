@@ -30,7 +30,7 @@ namespace ConvertLinuxPerfFiles.Model
         private List<PidProcessGroup> Processes = new List<PidProcessGroup>();
         private Dictionary<long, string> UniquePids;
         // number of metric that gets parsed.
-        private int MetricCount = 15;
+        private int MetricCount = 16;
 
         // class methods
         // Reads each line where there are metrics, creates a process object and adds it to the objects collection
@@ -188,6 +188,7 @@ namespace ConvertLinuxPerfFiles.Model
                     if (checkIfPidExists != 0)
                     {
                         var tm = timeStampGroup.GroupMetrics.Where(x => x.Pid == pid.Key).Select(x => x.Metrics).First();
+                        //Globals.log.WriteLog("Metric Count: " + tm.Count(), "GetPidStatMetrics:PidDoesExist", "[debug]");
 
                         foreach (var m in tm)
                         {
@@ -198,6 +199,7 @@ namespace ConvertLinuxPerfFiles.Model
                     // if the unique pid does not match the pid from the current process, we write 0.00
                     if (checkIfPidExists == 0)
                     {
+                        //Globals.log.WriteLog("Metric Count: " + pid.Key, "GetPidStatMetrics:PidDoesNotExist", "[debug]");
                         for (int i = 0; i <= MetricCount - 1; i++)
                         {
                             metric.Append('"' + "0.00" + '"' + "\t");

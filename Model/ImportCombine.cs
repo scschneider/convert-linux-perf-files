@@ -91,7 +91,7 @@ namespace ConvertLinuxPerfFiles.Model
             try
             {
                 string processCommand = "relog.exe ";
-                string processArgs = ".\\*.blg -o .\\Single_BLG\\" + ConfigValues.MachineName + "_AllPerfmonMetrics.blg -y";
+                string processArgs = ".\\Individual\\*.blg -o .\\" + ConfigValues.MachineName + "_AllPerfmonMetrics.blg -y";
                 Globals.log.WriteLog(processCommand + processArgs, "ImportCombine:RelogCombineToBlg", "[Info]");
                 
                 Process p = new Utility.ProcessUtility().StartProcess(processCommand, processArgs);
